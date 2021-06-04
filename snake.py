@@ -118,6 +118,10 @@ class game:
   
   #function to set up game
   def setupGame(self):
+    #calculate where to place main window
+    #y = int(round(self.rows/2 - (len(text)+2)/2))
+    #x = int(round(self.rows/2 - (windowHeight)/2))
+
     #configure main game window
     self.gameWindow = curses.newwin(self.height+2, self.width+2, 1, 0)
     self.gameWindow.border()
@@ -232,11 +236,10 @@ class game:
   
   def gameOverHandler(self):
     #calculate where to place window
-    #size = self.gameWindow.getmaxyx()
     text = "GAME OVER"
     windowHeight = 3
-    y = int(round(self.rows/2 - (len(text)+2)/2))
-    x = int(round(self.rows/2 - windowHeight/2))
+    y = int(round((self.height+2)/2 - windowHeight/2))
+    x = int(round((self.width+2)/2 - (len(text)+2)/2))
 
     #display a window saying GAME OVER
     self.gameOverWindow = curses.newwin(windowHeight, len(text)+2, y, x)
