@@ -1,4 +1,4 @@
-import os, random, json, time, threading, curses
+import os, random, json, time, threading, curses, traceback
 
 class game:
   def __init__(self):
@@ -52,12 +52,8 @@ class game:
     curses.cbreak()
     curses.noecho()
 
-    #configure main window
-    self.gameWindow = curses.newwin(self.height+2, self.width+2, 1, 0)
-    self.gameWindow.border()
-
-    #configure score display
-    self.scoreDisplay = curses.newwin(1, self.width+2, 0, 0)
+    #get size of screen
+    self.rows, self.cols = self.screen.getmaxyx()
   
   #function to print board
   def printBoard(self):
@@ -122,6 +118,13 @@ class game:
   
   #function to set up game
   def setupGame(self):
+    #configure main game window
+    self.gameWindow = curses.newwin(self.height+2, self.width+2, 1, 0)
+    self.gameWindow.border()
+
+    #configure score display
+    self.scoreDisplay = curses.newwin(1, self.width+2, 0, 0)
+
     #reset some variables
     self.length = 4
     self.board = self.blankBoard[:]
@@ -229,15 +232,44 @@ class game:
   
   def gameOverHandler(self):
     #calculate where to place window
-    size = self.gameWindow.getmaxyx()
-    y = int(size[0]/2)
-    x = int(size[1]/2)-5
+    #size = self.gameWindow.getmaxyx()
+    text = "GAME OVER"
+    windowHeight = 3
+    y = int(round(self.rows/2 - (len(text)+2)/2))
+    x = int(round(self.rows/2 - windowHeight/2))
 
     #display a window saying GAME OVER
-    self.gameOverWindow = curses.newwin(3, 11, y, x)
+    self.gameOverWindow = curses.newwin(windowHeight, len(text)+2, y, x)
     self.gameOverWindow.border()
     self.gameOverWindow.addstr(1, 1, "GAME OVER")
     self.gameOverWindow.refresh()
+
+  def mainMenuHandler(self):
+    #calculate where to place the title
+    titleLength = len(max(self.data["titleText"], key=len))
+    x = int(round(self.cols/2) - round(titleLength/2))
+
+    #create window for title
+    self.titleWindow = curses.newwin(7, titleLength+1, 0, x)
+    
+    #add text to window
+    for i in range(0, len(self.data["titleText"])):
+      self.titleWindow.addstr(i, 0, self.data["titleText"][i])
+    
+    #create window displaying main menu text
+    self.mainMenuWindow = curses.newwin(self.rows, self.cols, 8, 0)
+
+    #calculate where to place text
+    text = self.data["mainMenuText"]
+    textStart = int(round(self.cols/2) - round(len(text)/2))
+    self.mainMenuWindow.addstr(0, textStart, text)
+
+    #refresh windows
+    self.titleWindow.refresh()
+    self.mainMenuWindow.refresh()
+
+    #wait until keypress to continue
+    self.mainMenuWindow.getkey()
 
   def updateGame(self):
     while True:
@@ -266,9 +298,13 @@ class game:
         
   #main program function
   def main(self):
+    #show main menu screen
+    self.mainMenuHandler()
+
     #set up game
     self.setupGame()
     self.previousDirection = "east"
+
     #start thread
     self.thread = threading.Thread(target=self.updateGame)
     self.thread.start()
@@ -313,7 +349,6 @@ if __name__ == "__main__":
     curses.endwin()
   
   #quit curses and print exception if there was an error
-  except Exception as e: 
+  except Exception: 
     curses.endwin()
-    print(e)
-  
+    traceback.print_exc()  
