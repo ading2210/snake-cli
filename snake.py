@@ -131,7 +131,9 @@ class game:
 
     #reset some variables
     self.length = 4
+    self.score = 0
     self.board = self.blankBoard[:]
+    self.displayBoard = self.blankdisplayBoard[:]
     #sets the location of the head of the snake
     self.head = [int(self.width/2), int(self.height/2)]
     #sets the direction
@@ -139,6 +141,17 @@ class game:
     self.previousDirection = "east"
     #generate first food pellet
     self.generateFood()
+
+  def cleanupGame(self):
+    #erase game windo and score display
+    self.gameWindow.erase()
+    self.scoreDisplay.erase()
+
+    #reset variables
+    self.length = 4
+    self.score = 0
+    self.board = self.blankBoard[:]
+    self.displayBoard = self.blankdisplayBoard[:]
 
   #function to handle game tick
   def tick(self):
@@ -274,45 +287,7 @@ class game:
     #wait until keypress to continue
     self.mainMenuWindow.getkey()
 
-  def updateGame(self):
-    while True:
-      #idk how to do fancy stuff with threading, this works anyways
-      #basically it sleeps for half a second and checks if the timer
-      #has to be reset due to an input
-      for i in range(0, self.delay):
-        time.sleep(0.01)
-        if self.resetTimer == True:
-          break
-      if self.resetTimer == True:
-        self.resetTimer = False
-        continue
-
-      #stop if this condition is met
-      if self.stop == True:
-        break
-
-      #run a tick and stop if game over
-      if self.tick() == False:
-        self.stop = True
-        break
-
-      #refresh the board
-      self.printBoard()
-        
-  #main program function
-  def main(self):
-    #show main menu screen
-    self.mainMenuHandler()
-
-    #set up game
-    self.setupGame()
-    self.previousDirection = "east"
-
-    #start thread
-    self.thread = threading.Thread(target=self.updateGame)
-    self.thread.start()
-
-    #start main program loop
+  def getInput(self):
     while True:
       #get keyboard input
       key = self.screen.getkey()
@@ -336,6 +311,45 @@ class game:
         self.stop = True
       if self.stop == True:
         break
+        
+  #main program function
+  def main(self):
+    #show main menu screen
+    self.mainMenuHandler()
+
+    #set up game
+    self.setupGame()
+    self.previousDirection = "east"
+
+    #start thread
+    self.thread = threading.Thread(target=self.getInput)
+    self.thread.start()
+
+    #start main program loop
+    while True:
+      #idk how to do fancy stuff with threading, this works anyways
+      #basically it sleeps for half a second and checks if the timer
+      #has to be reset due to an input
+      for i in range(0, self.delay):
+        time.sleep(0.01)
+        if self.resetTimer == True:
+          break
+      if self.resetTimer == True:
+        self.resetTimer = False
+        continue
+
+      #stop if this condition is met
+      if self.stop == True:
+        break
+
+      #run a tick and stop if game over
+      if self.tick() == False:
+        self.gameOverHandler()
+        self.stop = True
+        break
+
+      #refresh the board
+      self.printBoard()
 
     #display game over screen
     self.gameOverHandler()
