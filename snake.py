@@ -226,6 +226,18 @@ class game:
     #return True if tick successful
     self.previousDirection = self.direction[:]
     return True
+  
+  def gameOverHandler(self):
+    #calculate where to place window
+    size = self.gameWindow.getmaxyx()
+    y = int(size[0]/2)
+    x = int(size[1]/2)-5
+
+    #display a window saying GAME OVER
+    self.gameOverWindow = curses.newwin(3, 11, y, x)
+    self.gameOverWindow.border()
+    self.gameOverWindow.addstr(1, 1, "GAME OVER")
+    self.gameOverWindow.refresh()
 
   def updateGame(self):
     while True:
@@ -286,17 +298,9 @@ class game:
       if self.stop == True:
         break
 
-    #calculate where to place window
-    size = self.gameWindow.getmaxyx()
-    y = int(size[0]/2)
-    x = int(size[1]/2)-5
-
-    #display a window saying GAME OVER
-    gameOverWindow = curses.newwin(3, 11, y, x)
-    gameOverWindow.border()
-    gameOverWindow.addstr(1, 1, "GAME OVER")
-    gameOverWindow.refresh()
-    curses.napms(500)
+    #display game over screen
+    self.gameOverHandler()
+    curses.napms(1000)
 
     #program will terminate after any key pressed
     self.screen.getkey()
