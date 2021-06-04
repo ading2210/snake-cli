@@ -1,0 +1,28 @@
+{
+  "directionalControls": {
+    "w": "north",
+    "a": "west",
+    "s": "south",
+    "d": "east"
+  },
+  "directionalOpposites": {
+    "north": "south",
+    "east": "west",
+    "south": "north",
+    "west": "east"
+  },
+  "displayCharactersASCII": {
+    "horizontal": "═",
+    "vertical": "║",
+    "north-west": "╝",
+    "south-west": "╗",
+    "north-east": "╚",
+    "south-east": "╔"
+  },
+  "horizontalDirections": ["east", "west"],
+  "verticalDirections": ["north", "south"],
+  "north-west": ["north", "west"],
+  "north-east": ["north", "east"],
+  "south-west": ["south", "west"],
+  "south-east": ["south", "east"]
+}
