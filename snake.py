@@ -1,7 +1,5 @@
 import os, random, json, time, threading, curses
 
-#trying to port this to curses
-
 class game:
   def __init__(self):
     #load extradata.json
@@ -305,6 +303,13 @@ class game:
 
 #run the game if this is the main thread
 if __name__ == "__main__":
-  game()
-  #when game ends reset curses
-  curses.endwin()
+  try:
+    game()
+    #when game ends quit curses
+    curses.endwin()
+  
+  #quit curses and print exception if there was an error
+  except Exception as e: 
+    curses.endwin()
+    print(e)
+  

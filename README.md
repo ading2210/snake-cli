@@ -1,3 +1,7 @@
 # Snake game in the terminal!
 
-Basically just snake lol
+Basically just snake 
+
+Play it at https://replit.com/@UniqueOstrich18/Snake
+
+Also no external modules used! (except curses but I'm not counting that since thats built into python)
