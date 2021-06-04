@@ -36,6 +36,9 @@ class game:
     self.previousDirection = "east"
     self.stop = False
     self.resetTimer = False
+    self.score = 0
+    self.diffuculty = 0
+    self.delay = 50
 
     #set up curses
     self.setupCurses()
@@ -61,7 +64,7 @@ class game:
   #function to print board
   def printBoard(self):
     #refresh score display
-    self.scoreDisplay.addstr(0, 0, "Score: "+str(self.length - 4))
+    self.scoreDisplay.addstr(0, 0, "Score: "+str(self.score))
     self.scoreDisplay.refresh()
 
     #refresh game window
@@ -163,10 +166,17 @@ class game:
       if self.head[1] == self.height:
         return False
 
-    #checks if snake has run into food
+    #checks if snake has run into food and update score
     if self.board[self.head[1]][self.head[0]] == -1:
       self.generateFood()
       self.length = self.length + 1
+      self.score = self.score + 1
+
+      #calculate diffuculty
+      if self.score%5 == 0:
+        self.diffuculty = self.diffuculty+1
+        #change amount of delay depending on diffuculty
+        self.delay = int(50*(0.75**self.diffuculty))
     
     #iterates through board and decreases the ticks remaining
     #for each part of the snake
@@ -224,7 +234,7 @@ class game:
       #idk how to do fancy stuff with threading, this works anyways
       #basically it sleeps for half a second and checks if the timer
       #has to be reset due to an input
-      for i in range(0, 50):
+      for i in range(0, self.delay):
         time.sleep(0.01)
         if self.resetTimer == True:
           break
