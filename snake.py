@@ -10,8 +10,8 @@ class game:
     f.close()
 
     #set display size
-    self.width = 30
-    self.height = 12
+    self.width = 29
+    self.height = 13
 
     #create blank board to be used internally
     self.blankBoard = []
@@ -287,6 +287,21 @@ class game:
         self.stop = True
       if self.stop == True:
         break
+
+    #calculate where to place window
+    size = self.gameWindow.getmaxyx()
+    y = int(size[0]/2)
+    x = int(size[1]/2)-5
+
+    #display a window saying GAME OVER
+    gameOverWindow = curses.newwin(3, 11, y, x)
+    gameOverWindow.border()
+    gameOverWindow.addstr(1, 1, "GAME OVER")
+    gameOverWindow.refresh()
+    curses.napms(500)
+
+    #program will terminate after any key pressed
+    self.screen.getkey()
 
 #run the game if this is the main thread
 if __name__ == "__main__":
