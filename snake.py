@@ -45,16 +45,26 @@ class game:
 
   #function to set up curses
   def setupCurses(self):
+    #configure curses
     self.screen = curses.initscr()
-    self.gameWindow = curses.newwin(self.height+2, self.width+2, 0, 0)
-    self.gameWindow.border()
     curses.curs_set(0)
     curses.cbreak()
     curses.noecho()
+
+    #configure main window
+    self.gameWindow = curses.newwin(self.height+2, self.width+2, 1, 0)
+    self.gameWindow.border()
+
+    #configure score display
+    self.scoreDisplay = curses.newwin(1, self.width+2, 0, 0)
   
   #function to print board
   def printBoard(self):
-    #self.gameWindow.clear()
+    #refresh score display
+    self.scoreDisplay.addstr(0, 0, "Score: "+str(self.length - 4))
+    self.scoreDisplay.refresh()
+
+    #refresh game window
     rows = []
     for y in range(0, self.height):
       rows.append("".join(map(str,self.displayBoard[y])))
