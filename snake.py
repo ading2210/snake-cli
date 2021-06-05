@@ -293,6 +293,8 @@ class game:
     while True:
       #get keyboard input
       key = self.gameWindow.getch()
+
+      #convert int to ascii
       if key > 0:
         keyString = chr(key)
       else:
@@ -304,13 +306,19 @@ class game:
       #if input is valid then run a tick
       if keyString in self.data["directionalControls"]:
         self.direction = self.data["directionalControls"][keyString]
-        #if player loses, break from loop
-        if self.tick() == False:
-          self.stop = True
-        else: #if not then refresh board
-          self.printBoard()
-          #reset the timer of the other thread
-          self.resetTimer = True
+        #correct direction if move is invalid
+        if self.direction == self.data["directionalOpposites"][self.previousDirection]:
+          self.direction = self.previousDirection[:]
+        else:
+          #run tick
+          tick = self.tick()
+          #if player loses, break fron loop
+          if tick == False:
+            self.stop = True
+          else: #if not then refresh board
+            self.printBoard()
+            #reset the timer of the other thread
+            self.resetTimer = True
         
       #break if key x is pressed
       elif keyString == "x":
