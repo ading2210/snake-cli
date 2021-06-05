@@ -119,8 +119,6 @@ class game:
   #function to set up game
   def setupGame(self):
     #calculate where to place main window
-    #y = int(round(self.rows/2 - (len(text)+2)/2))
-    #x = int(round(self.rows/2 - (windowHeight)/2))
 
     #configure main game window
     self.gameWindow = curses.newwin(self.height+2, self.width+2, 1, 0)
@@ -134,24 +132,19 @@ class game:
     self.score = 0
     self.board = self.blankBoard[:]
     self.displayBoard = self.blankdisplayBoard[:]
+
     #sets the location of the head of the snake
     self.head = [int(self.width/2), int(self.height/2)]
+
     #sets the direction
     self.direction = "east"
     self.previousDirection = "east"
+
     #generate first food pellet
     self.generateFood()
 
-  def cleanupGame(self):
-    #erase game windo and score display
-    self.gameWindow.erase()
-    self.scoreDisplay.erase()
-
-    #reset variables
-    self.length = 4
-    self.score = 0
-    self.board = self.blankBoard[:]
-    self.displayBoard = self.blankdisplayBoard[:]
+    #set game window to nodelay mode
+    self.gameWindow.nodelay(True)
 
   #function to handle game tick
   def tick(self):
@@ -194,7 +187,7 @@ class game:
       if self.score%5 == 0:
         self.diffuculty = self.diffuculty+1
         #change amount of delay depending on diffuculty
-        self.delay = int(50*(0.75**self.diffuculty))
+        self.delay = int(50*(0.85**self.diffuculty))
     
     #iterates through board and decreases the ticks remaining
     #for each part of the snake
@@ -248,6 +241,9 @@ class game:
     return True
   
   def gameOverHandler(self):
+    #turn off nodelay mode for game window
+    self.gameWindow.nodelay(False)
+
     #calculate where to place window
     text = "GAME OVER"
     windowHeight = 3
@@ -287,17 +283,27 @@ class game:
     #wait until keypress to continue
     self.mainMenuWindow.getkey()
 
+    #hide windows
+    self.titleWindow.clear()
+    self.mainMenuWindow.clear()
+    self.titleWindow.refresh()
+    self.mainMenuWindow.refresh()
+
   def getInput(self):
     while True:
       #get keyboard input
-      key = self.screen.getkey()
+      key = self.gameWindow.getch()
+      if key > 0:
+        keyString = chr(key)
+      else:
+        keyString = ""
       if self.stop == True:
         break
 
       #process keyboard input
       #if input is valid then run a tick
-      if key in self.data["directionalControls"]:
-        self.direction = self.data["directionalControls"][key]
+      if keyString in self.data["directionalControls"]:
+        self.direction = self.data["directionalControls"][keyString]
         #if player loses, break from loop
         if self.tick() == False:
           self.stop = True
@@ -305,12 +311,15 @@ class game:
           self.printBoard()
           #reset the timer of the other thread
           self.resetTimer = True
-          
+        
       #break if key x is pressed
-      elif key == "x":
+      elif keyString == "x":
         self.stop = True
       if self.stop == True:
         break
+
+      #sleep for a bit so we don't waste cpu
+      time.sleep(0.01)
         
   #main program function
   def main(self):
@@ -356,7 +365,7 @@ class game:
     curses.napms(1000)
 
     #program will terminate after any key pressed
-    self.screen.getkey()
+    self.gameWindow.getkey()
 
 #run the game if this is the main thread
 if __name__ == "__main__":
