@@ -17,7 +17,8 @@
     "north-west": "╝",
     "south-west": "╗",
     "north-east": "╚",
-    "south-east": "╔"
+    "south-east": "╔",
+    "barrier": "▒"
   },
   "horizontalDirections": ["east", "west"],
   "verticalDirections": ["north", "south"],
@@ -33,7 +34,7 @@
     "|_____  ||  _    ||       ||     |_ |    ___|",
     " _____| || | |   ||   _   ||    _  ||   |___ ",
     "|_______||_|  |__||__| |__||___| |_||_______|"],
-  "mainMenuText": "Press any key to start",
+  "mainMenuText": "Press any key to start, C for options",
   "optionsTitleText": "Customize Game:",
   "optionsMenuItems": [
     {
@@ -41,6 +42,12 @@
       "id":"increase_difficulty",
       "type": "toggle",
       "default": "true"
+    },
+    {
+      "name": "Generate barriers",
+      "id":"create_barriers",
+      "type": "toggle",
+      "default": "false"
     },
     {
       "name": "test",

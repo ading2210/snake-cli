@@ -1,4 +1,4 @@
-import os, random, json, time, threading, curses, traceback, menu
+import os, random, json, time, threading, curses, traceback, math, menu
 
 class game:
   def __init__(self):
@@ -102,7 +102,11 @@ class game:
     pixels = self.width*self.height
     #gets a random number between 1 and the number of pixels
     #minus the length
-    randint = random.randint(1,pixels-self.length)
+    if self.options["create_barriers"] == "False":
+      randint = random.randint(1,pixels-self.length)
+    else:
+      barriercount = math.floor(self.score/2)
+      randint = random.randint(1,pixels-self.length- barriercount)
     counter = 1
     break_ = False
     for y in range(0, self.height):
@@ -114,6 +118,40 @@ class game:
             #places food if condition is satisfied
             self.setPixel(x, y, -1)
             self.setDisplayPixel(x, y, "$")
+            break_ = True
+            break
+          #increase the counter if condition not satisfied
+          counter = counter + 1
+      if break_ == True:
+        break
+    
+    #iterate through the board
+    for y in range(0, self.height):
+      for x in range(0, self.width):
+        #if pixel contains a snake piece, increase the time until it despawns
+        if self.getPixel(x, y) > 0:
+          self.setPixel(x, y, self.getPixel(x, y)+1)
+
+  #this function generates a barrier, which is basically
+  #the same as the previous function
+  def generateBarrier(self):
+    pixels = self.width*self.height
+    #gets a random number between 1 and the number of pixels
+    #minus the length plus the food
+    barriercount = math.floor(self.score/2)
+    randint = random.randint(1,pixels-self.length-1- barriercount)
+    counter = 1
+    break_ = False
+    for y in range(0, self.height):
+      for x in range(0, self.width):
+        #checks to see if tile is elegible
+        if self.board[y][x] == 0:
+          #checks to see if the random number == the counter
+          if randint == counter:
+            #places food if condition is satisfied
+            self.setPixel(x, y, -2)
+            self.setDisplayPixel(x, y, self.data["displayCharactersASCII"]["barrier"])
+            self.setDisplayPixelNoScaling(x*2-1, y, self.data["displayCharactersASCII"]["barrier"])
             break_ = True
             break
           #increase the counter if condition not satisfied
@@ -197,6 +235,10 @@ class game:
       self.length = self.length + 1
       self.score = self.score + 1
 
+      #place a barrier every other point
+      if self.score%2 == 0:
+        self.generateBarrier()
+
       #calculate diffuculty, ignore if disabled
       if self.options["increase_difficulty"] == True:
         if self.score%5 == 0:
@@ -216,6 +258,10 @@ class game:
             self.setDisplayPixel(x, y, " ")
             #fix this later plz
             self.setDisplayPixelNoScaling(x*2-1, y, " ")
+    
+    #checks if snake has run into a barrier
+    if self.board[self.head[1]][self.head[0]] == -2:
+      return False
     
     #checks to see if snake has run into itself
     if self.board[self.head[1]][self.head[0]] > 0:

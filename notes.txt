@@ -1,4 +1,5 @@
 Data format for the board:
+ - -2 = barrier
  - -1 = food
  - 0 = nothing
  - 1+ = part of the snake - the number represents the number of ticks until the snake part disappears
