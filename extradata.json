@@ -33,5 +33,21 @@
     "|_____  ||  _    ||       ||     |_ |    ___|",
     " _____| || | |   ||   _   ||    _  ||   |___ ",
     "|_______||_|  |__||__| |__||___| |_||_______|"],
-  "mainMenuText": "Press any key to start"
+  "mainMenuText": "Press any key to start",
+  "optionsTitleText": "Customize Game:",
+  "optionsMenuItems": [
+    {
+      "name": "Gradually speed up snake",
+      "id":"increase_difficulty",
+      "type": "toggle",
+      "default": "true"
+    },
+    {
+      "name": "test",
+      "id":"placeholder_option",
+      "type": "choice",
+      "choices": ["a", "b", "c"],
+      "default": "a"
+    }
+  ]
 }

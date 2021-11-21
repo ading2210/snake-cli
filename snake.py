@@ -1,4 +1,4 @@
-import os, random, json, time, threading, curses, traceback
+import os, random, json, time, threading, curses, traceback, menu
 
 class game:
   def __init__(self):
@@ -8,7 +8,7 @@ class game:
     f.close()
 
     #set display size
-    self.width = 29
+    self.width = 17
     self.height = 13
 
     #create blank board to be used internally
@@ -24,7 +24,7 @@ class game:
     self.blankdisplayBoard = []
     for y in range(0, self.height):
       self.blankdisplayBoard.append([])
-      for x in range(0, self.width):
+      for x in range(0, self.width*2):
         self.blankdisplayBoard[y].append(" ")
     self.displayBoard = self.blankdisplayBoard[:]
 
@@ -41,8 +41,17 @@ class game:
     #set up curses
     self.setupCurses()
 
+    #read default values for variables
+    self.options = {}
+    for item in self.data["optionsMenuItems"]:
+      self.options[item["id"]] = item["default"]
+
     #start main program loop
     self.main()
+
+    #ansi escape codes to hightlight stuff
+    self.hightlight = "\033[7m"
+    self.reset = "\033[0m"
 
   #function to set up curses
   def setupCurses(self):
@@ -67,6 +76,7 @@ class game:
       rows.append("".join(map(str,self.displayBoard[y])))
     for y in range(0, len(rows)):
       self.gameWindow.addstr(y+1, 1, rows[y])
+    self.gameWindow.border()
     self.gameWindow.refresh()
     
   #function to set a pixel on the board
@@ -79,6 +89,8 @@ class game:
 
   #set the value of a pixel on the screen
   def setDisplayPixel(self, x, y, content):
+    self.displayBoard[y][x*2] = content
+  def setDisplayPixelNoScaling(self, x, y, content):
     self.displayBoard[y][x] = content
   
   #get the value of a pixel on the screen
@@ -119,13 +131,15 @@ class game:
   #function to set up game
   def setupGame(self):
     #calculate where to place main window
+    windowWidth = self.width*2 + 1
+    self.windowStart = int(round(self.cols/2) - round(windowWidth/2))
 
     #configure main game window
-    self.gameWindow = curses.newwin(self.height+2, self.width+2, 1, 0)
+    self.gameWindow = curses.newwin(self.height+2, windowWidth, 1, self.windowStart)
     self.gameWindow.border()
 
     #configure score display
-    self.scoreDisplay = curses.newwin(1, self.width+2, 0, 0)
+    self.scoreDisplay = curses.newwin(1, self.width*2+2, 0, self.windowStart)
 
     #reset some variables
     self.length = 4
@@ -183,11 +197,12 @@ class game:
       self.length = self.length + 1
       self.score = self.score + 1
 
-      #calculate diffuculty
-      if self.score%5 == 0:
-        self.diffuculty = self.diffuculty+1
-        #change amount of delay depending on diffuculty
-        self.delay = int(50*(0.85**self.diffuculty))
+      #calculate diffuculty, ignore if disabled
+      if self.options["increase_difficulty"] == True:
+        if self.score%5 == 0:
+          self.diffuculty = self.diffuculty+1
+          #change amount of delay depending on diffuculty
+          self.delay = int(50*(0.85**self.diffuculty))
     
     #iterates through board and decreases the ticks remaining
     #for each part of the snake
@@ -199,6 +214,8 @@ class game:
           #clears a pixel on the display
           if self.getPixel(x, y) == 0:
             self.setDisplayPixel(x, y, " ")
+            #fix this later plz
+            self.setDisplayPixelNoScaling(x*2-1, y, " ")
     
     #checks to see if snake has run into itself
     if self.board[self.head[1]][self.head[0]] > 0:
@@ -215,23 +232,33 @@ class game:
     if self.direction in self.data["horizontalDirections"]:
       #set the head on the display to the correct character
       self.setDisplayPixel(newX, newY, self.data["displayCharactersASCII"]["horizontal"])
+      if self.direction != "west" or self.direction == self.previousDirection:
+        self.setDisplayPixelNoScaling(newX*2-1, newY, self.data["displayCharactersASCII"]["horizontal"])
+      if self.direction != "west" and self.direction == self.previousDirection:
+        self.setDisplayPixelNoScaling(newX*2-1, newY, self.data["displayCharactersASCII"]["horizontal"])
+      elif self.direction == "west" and self.direction == self.previousDirection:
+        self.setDisplayPixelNoScaling(newX*2+1, newY, self.data["displayCharactersASCII"]["horizontal"])
     else: #if not then the snake is going vertially
       self.setDisplayPixel(newX, newY, self.data["displayCharactersASCII"]["vertical"])
 
     #check if snake has turned
     if not self.direction == self.previousDirection:
+      if self.direction == "west" and self.previousDirection in self.data["verticalDirections"]:
+        self.setDisplayPixelNoScaling(previousX*2-1, previousY, self.data["displayCharactersASCII"]["horizontal"])
       #uhhh idk why this works but it does
       if sorted([self.direction, self.data["directionalOpposites"][self.previousDirection]]) == sorted(self.data["north-west"]):
         self.setDisplayPixel(previousX, previousY, self.data["displayCharactersASCII"]["north-west"])
       #basically the same code as above
       elif sorted([self.direction, self.data["directionalOpposites"][self.previousDirection]]) == sorted(self.data["south-west"]):
         self.setDisplayPixel(previousX, previousY, self.data["displayCharactersASCII"]["south-west"])
-
+        
       elif sorted([self.direction, self.data["directionalOpposites"][self.previousDirection]]) == sorted(self.data["north-east"]):
         self.setDisplayPixel(previousX, previousY, self.data["displayCharactersASCII"]["north-east"])
+        self.setDisplayPixelNoScaling(previousX*2-1, previousY, " ")
 
       elif sorted([self.direction, self.data["directionalOpposites"][self.previousDirection]]) == sorted(self.data["south-east"]):
         self.setDisplayPixel(previousX, previousY, self.data["displayCharactersASCII"]["south-east"])
+        self.setDisplayPixelNoScaling(previousX*2-1, previousY, " ")
         
       else: #fall back to using #
         self.setDisplayPixel(previousX, previousY, "#")
@@ -248,7 +275,7 @@ class game:
     text = "GAME OVER"
     windowHeight = 3
     y = int(round((self.height+2)/2 - windowHeight/2))
-    x = int(round((self.width+2)/2 - (len(text)+2)/2))
+    x = int(round((self.width*2+2)/2 - (len(text)+2)/2)) + self.windowStart
 
     #display a window saying GAME OVER
     self.gameOverWindow = curses.newwin(windowHeight, len(text)+2, y, x)
@@ -281,13 +308,122 @@ class game:
     self.mainMenuWindow.refresh()
 
     #wait until keypress to continue
-    self.mainMenuWindow.getkey()
+    key = self.mainMenuWindow.getkey()
 
     #hide windows
     self.titleWindow.clear()
     self.mainMenuWindow.clear()
     self.titleWindow.refresh()
     self.mainMenuWindow.refresh()
+
+    #show options screen if key pressed
+    if key == "c":
+      self.optionsScreen()
+
+  def optionsScreen(self):
+    items = self.data["optionsMenuItems"]
+    #create window for menu
+    self.optionsMenuWindow = curses.newwin(self.rows, self.cols, 0, 0)
+    self.optionsMenu = menu.Menu(self.optionsMenuWindow)
+
+    #set up options menu
+    self.optionsMenu.setTitle("Configure game:")
+    self.optionsMenu.setFooter("Use arrow keys to navigate. Enter to select. X to exit.")
+    
+    #set items
+    for item in items:
+      self.optionsMenu.appendItem(item)
+    self.optionsMenu.refresh()
+
+    #loop to handle inputs
+    while True:
+      key = self.optionsMenuWindow.getch()
+
+      if key == ord("x"):
+        break
+      elif key == 65: #up
+        self.optionsMenu.decreaseIndex()
+      elif key == 66: #down
+        self.optionsMenu.increaseIndex()
+
+      elif key == 10 or key == 13: #enter
+        item = items[self.optionsMenu.index]
+        #create submenu
+        submenuWindow = curses.newwin(self.rows, self.cols, 0, 0)
+        submenu = menu.Menu(submenuWindow)
+        submenu.setTitle("Submenu: "+item["name"])
+        submenu.setFooter("Use arrow keys to navigate. Enter to select. X to exit.")
+        
+        #create items in submenu
+        if item["type"] == "toggle":
+          submenu.items = ["True", "False", "Back"]
+        elif item["type"] == "choice":
+          submenu.items = item["choices"] + ["Back"]
+        
+        #hide main options menu
+        self.optionsMenuWindow.clear()
+        self.optionsMenuWindow.refresh()
+
+        #show submenu
+        submenu.refresh()
+        
+        #main loop for submenu
+        while True:
+          #get key
+          key = submenuWindow.getch()
+
+          #if x is pressed then exit menu
+          if key == ord("x"):
+            break
+          elif key == 65: #up
+            submenu.decreaseIndex()
+          elif key == 66: #down
+            submenu.increaseIndex()
+
+          #this is run when the enter key is pressed
+          elif key == 10 or key == 13:
+            currentItem = submenu.currentItem()
+
+            #check the type of the item
+            #if it is a string, then proceed
+            if type(currentItem) is str:
+              #break if back is selected
+              if currentItem == "Back":
+                break
+              else:
+                optionsMenuItems = self.data["optionsMenuItems"]
+                #change the appropriate value in the options
+                for menuItem in optionsMenuItems:
+                  if menuItem["name"] == item["name"]:
+                    self.options[menuItem["id"]] = currentItem
+                    break
+            elif type(currentItem) is dict:
+              pass
+            break
+          else:
+            continue
+          
+          submenu.refresh()
+        self.saveOptions()
+
+      else:
+        continue
+
+      #refresh
+      self.optionsMenu.refresh()
+
+    #hide windows
+    self.optionsMenuWindow.clear()
+    self.optionsMenuWindow.refresh()
+
+  def saveOptions(self):
+    with open('options.json', 'w') as outfile:
+      json.dump(self.options, outfile)
+
+  def loadOptions(self):
+    optionsFile = open("options.json")
+    self.options = json.load(optionsFile)
+    optionsFile.close()
 
   def getInput(self):
     while True:
@@ -345,7 +481,7 @@ class game:
     #start main program loop
     while True:
       #idk how to do fancy stuff with threading, this works anyways
-      #basically it sleeps for half a second and checks if the timer
+      #basically it sleeps for a bit and checks if the timer
       #has to be reset due to an input
       for i in range(0, self.delay):
         time.sleep(0.01)
