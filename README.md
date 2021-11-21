@@ -11,4 +11,5 @@ Play it at https://replit.com/@UniqueOstrich18/CLI-Snake
 - WASD to control the snake
 - X to quit game
 - Arrow keys to navigate in menus
-- C on title screen to access settings (work in progress)
+- C on title screen to access settings
+- Barrier mode also available 

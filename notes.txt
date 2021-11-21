@@ -4,5 +4,5 @@ Data format for the board:
  - 0 = nothing
  - 1+ = part of the snake - the number represents the number of ticks until the snake part disappears
 
-
-Do not call window.clear()
+TODO:
+ - make sure player doesn't get softlocked in barrier mode
