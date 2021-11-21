@@ -1,7 +1,14 @@
-# Snake game in the terminal!
+## Snake game in the terminal!
+![title screen](https://raw.githubusercontent.com/ading2210/snake-cli/master/images/title.png)
+![game](https://raw.githubusercontent.com/ading2210/snake-cli/master/images/game.png)
+![game over screen](https://raw.githubusercontent.com/ading2210/snake-cli/master/images/gameover.png)
 
-Basically just snake 
+This is a snake game in the cli, written in python. 
 
 Play it at https://replit.com/@UniqueOstrich18/CLI-Snake
 
-Also no external modules used! (except curses but I'm not counting that since thats built into python)
+### Controls:
+- WASD to control the snake
+- X to quit game
+- Arrow keys to navigate in menus
+- C on title screen to access settings (work in progress)
