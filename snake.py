@@ -220,6 +220,10 @@ class game:
     #checks to see if snake has run into itself
     if self.board[self.head[1]][self.head[0]] > 0:
       return False
+    for y in range(0, self.height):
+      for x in range(0, self.width):
+        if self.getPixel(x, y) == -1:
+          self.setDisplayPixel(x, y, "$")
     
     #updates location of head internally
     self.setPixel(self.head[0], self.head[1], self.length)
