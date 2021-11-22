@@ -386,15 +386,20 @@ class game:
 
     #create window displaying main menu text
     self.mainMenuWindow = curses.newwin(self.rows, self.cols, 8, 0)
+    self.mainMenuWindow2 = curses.newwin(self.rows, self.cols, 9, 0)
 
     #calculate where to place text
     text = self.data["mainMenuText"]
+    text2 = self.data["mainMenuText2"]
     textStart = int(round(self.cols/2) - round(len(text)/2))
+    textStart2 = int(round(self.cols/2) - round(len(text2)/2))
     self.mainMenuWindow.addstr(0, textStart, text)
+    self.mainMenuWindow2.addstr(0, textStart2, text2)
 
     #refresh windows
     self.titleWindow.refresh()
     self.mainMenuWindow.refresh()
+    self.mainMenuWindow2.refresh()
 
     #wait until keypress to continue
     key = self.mainMenuWindow.getkey()
@@ -402,12 +407,12 @@ class game:
     #hide windows
     self.titleWindow.clear()
     self.mainMenuWindow.clear()
+    self.mainMenuWindow2.clear()
     self.titleWindow.refresh()
     self.mainMenuWindow.refresh()
+    self.mainMenuWindow2.refresh()
 
-    #show options screen if key pressed
-    if key == "c":
-      self.optionsScreen()
+    return key
 
   def optionsScreen(self):
     items = self.data["optionsMenuItems"]
@@ -422,7 +427,8 @@ class game:
     #set items
     for item in items:
       item["oldName"] = item["name"]
-      item["name"] = item["name"]+" ({value})".format(value=self.options[item["id"]])
+      if item["type"] != "text":
+        item["name"] = item["name"]+" ({value})".format(value=self.options[item["id"]])
       self.optionsMenu.appendItem(item)
     self.optionsMenu.appendItem("─"*self.cols)
     self.optionsMenu.appendItem("Save and exit")
@@ -459,17 +465,20 @@ class game:
 
         #create items in submenu
         if item["type"] == "toggle":
-          submenu.items = ["True", "False", "─"*self.cols]
-          submenu.items = submenu.items + ["<- Back"]
+          submenu.items = ["True", "False", "─"*self.cols] + ["<- Back"]
         elif item["type"] == "choice":
-          submenu.items = item["choices"] + ["─"*self.cols]
-          submenu.items = submenu.items + ["<- Back"]
+          submenu.items = item["choices"] + ["─"*self.cols] + ["<- Back"]
+        elif item["type"] == "text":
+          submenu.items = item["default"]
+          submenu.items = submenu.items + ["─"*self.cols] + ["<- Back"]
 
         #hide main options menu
         self.optionsMenuWindow.clear()
         self.optionsMenuWindow.refresh()
 
         #show submenu
+        if item["type"] == "text":
+          submenu.decreaseIndex()
         submenu.refresh()
 
         #main loop for submenu
@@ -480,17 +489,18 @@ class game:
           #if x is pressed then exit menu
           if key == ord("x"):
             break
-          elif key == 65: #up
-            submenu.decreaseIndex()
-            if submenu.currentItem() == "─"*self.cols:
+          if item["type"] != "text":
+            if key == 65: #up
               submenu.decreaseIndex()
-          elif key == 66: #down
-            submenu.increaseIndex()
-            if submenu.currentItem() == "─"*self.cols:
+              if submenu.currentItem() == "─"*self.cols:
+                submenu.decreaseIndex()
+            elif key == 66: #down
               submenu.increaseIndex()
+              if submenu.currentItem() == "─"*self.cols:
+                submenu.increaseIndex()
 
           #this is run when the enter key is pressed
-          elif key == 10 or key == 13:
+          if key == 10 or key == 13:
             currentItem = submenu.currentItem()
 
             #check the type of the item
@@ -518,7 +528,8 @@ class game:
         for item in items:
           if item == "Save and exit.":
             continue
-          item["name"] = item["oldName"]+" ({value})".format(value=self.options[item["id"]])
+          if item["type"] != "text":
+            item["name"] = item["oldName"]+" ({value})".format(value=self.options[item["id"]])
           self.optionsMenu.editItem(item, counter)
           counter = counter+1
       else:
@@ -588,7 +599,12 @@ class game:
   #main program function
   def main(self):
     #show main menu screen
-    self.mainMenuHandler()
+    key = self.mainMenuHandler()
+    #show options screen if key pressed
+    if key == "c":
+      self.optionsScreen()
+    elif key == "x":
+      return
 
     #set up game
     self.setupGame()

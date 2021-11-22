@@ -1,1 +1,1 @@
-run="python3 snake.py"
+run="sleep 0.5; python3 snake.py"

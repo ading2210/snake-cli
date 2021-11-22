@@ -64,7 +64,8 @@ class Menu:
         self.window.addstr(i+2, 0, item)
     
     #create text at bottom of screen
-    self.window.addstr(self.window.getmaxyx()[0]-2, 0, self.footer)
+    self.window.addstr(self.rows-3, 0, "═"*self.cols)
+    self.window.addstr(self.rows-2, 0, self.footer)
 
     #do highlighting
     for i in range(0, len(self.items)):

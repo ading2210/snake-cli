@@ -35,7 +35,8 @@
     "└─────┐ ││ ┌─┐   ││       ││     └─┐│   ┌───┘",
     "┌─────┘ ││ │ └┐  ││  ┌─┐  ││   ┌─┐ ││   └───┐",
     "└───────┘└─┘  └──┘└──┘ └──┘└───┘ └─┘└───────┘"],
-  "mainMenuText": "Press any key to start, C for options",
+  "mainMenuText": "Press any key to start, c for options",
+  "mainMenuText2": "Press x to quit",
   "optionsTitleText": "Customize Game:",
   "optionsMenuItems": [
     {
@@ -56,6 +57,20 @@
       "id":"create_barriers",
       "type": "toggle",
       "default": "False"
+    },
+    {
+      "name": "Credits",
+      "id":"credits",
+      "type": "text",
+      "default": 
+      ["All programing has been done by me.",
+      "The curses library is used for input handling",
+      "and displaying graphics.",
+      "",
+      "Accounts:",
+      "Repl.it: @UniqueOstrich18",
+      "Github: ading2210",
+      "Discord: vk6#7391"]
     }
   ]
 }

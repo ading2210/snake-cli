@@ -1,1 +1,1 @@
-{"increase_difficulty": "False", "speed": "Normal", "create_barriers": "False", "placeholder_option": "a"}
+{"increase_difficulty": "True", "speed": "Normal", "create_barriers": "False", "credits": ["All programing has been done by me.", "The curses library is used for input handling", "and displaying graphics.", "", "Accounts:", "Repl.it: @UniqueOstrich18", "Github: ading2210", "Discord: vk6#7391"]}
