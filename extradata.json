@@ -27,13 +27,14 @@
   "south-west": ["south", "west"],
   "south-east": ["south", "east"],
   
-  "titleText": [" _______  __    _  _______  ___   _  _______",
-    "|       ||  |  | ||   _   ||   | | ||       |",
-    "|  _____||   |_| ||  |_|  ||   |_| ||    ___|",
-    "| |_____ |       ||       ||      _||   |___",
-    "|_____  ||  _    ||       ||     |_ |    ___|",
-    " _____| || | |   ||   _   ||    _  ||   |___ ",
-    "|_______||_|  |__||__| |__||___| |_||_______|"],
+  "titleText": [
+    "┌───────┐┌──┐  ┌─┐┌───────┐┌───┐ ┌─┐┌───────┐",
+    "│       ││  └┐ │ ││  ┌─┐  ││   │ │ ││       │",
+    "│ ┌─────┘│   └─┘ ││  └─┘  ││   └─┘ ││   ┌───┘",
+    "│ └─────┐│       ││       ││     ┌─┘│   └───┐",
+    "└─────┐ ││ ┌─┐   ││       ││     └─┐│   ┌───┘",
+    "┌─────┘ ││ │ └┐  ││  ┌─┐  ││   ┌─┐ ││   └───┐",
+    "└───────┘└─┘  └──┘└──┘ └──┘└───┘ └─┘└───────┘"],
   "mainMenuText": "Press any key to start, C for options",
   "optionsTitleText": "Customize Game:",
   "optionsMenuItems": [
@@ -42,6 +43,13 @@
       "id":"increase_difficulty",
       "type": "toggle",
       "default": "true"
+    },
+    {
+      "name": "Snake speed",
+      "id":"speed",
+      "type": "choice",
+      "choices": ["Slow", "Normal", "Fast"],
+      "default": "Normal"
     },
     {
       "name": "Generate barriers",

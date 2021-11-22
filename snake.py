@@ -7,6 +7,20 @@ class game:
     self.data = json.load(f)
     f.close()
 
+    self.options = {}
+
+    #read default values for variables
+    self.defaultOptions = {}
+    for item in self.data["optionsMenuItems"]:
+      self.defaultOptions[item["id"]] = item["default"]
+
+    #read options.json
+    if os.path.exists("options.json"):
+      self.loadOptions()
+    else:
+      self.saveOptions(options=self.defaultOptions)
+      self.options = dict(self.defaultOptions)
+
     #set display size
     self.width = 17
     self.height = 13
@@ -38,13 +52,10 @@ class game:
     self.diffuculty = 0
     self.delay = 50
 
+    self.applyOptions()
+
     #set up curses
     self.setupCurses()
-
-    #read default values for variables
-    self.options = {}
-    for item in self.data["optionsMenuItems"]:
-      self.options[item["id"]] = item["default"]
 
     #start main program loop
     self.main()
@@ -52,6 +63,14 @@ class game:
     #ansi escape codes to hightlight stuff
     self.hightlight = "\033[7m"
     self.reset = "\033[0m"
+
+  def applyOptions(self):
+    if self.options["speed"] == "Normal":
+      self.delay = 50
+    elif self.options["speed"] == "Fast":
+      self.delay = 30
+    elif self.options["speed"] == "Slow":
+      self.delay = 75
 
   #function to set up curses
   def setupCurses(self):
@@ -63,7 +82,7 @@ class game:
 
     #get size of screen
     self.rows, self.cols = self.screen.getmaxyx()
-  
+
   #function to print board
   def printBoard(self):
     #refresh score display
@@ -78,11 +97,11 @@ class game:
       self.gameWindow.addstr(y+1, 1, rows[y])
     self.gameWindow.border()
     self.gameWindow.refresh()
-    
+
   #function to set a pixel on the board
   def setPixel(self, x, y, content):
     self.board[y][x] = content
-  
+
   #function to get the value of a pixel
   def getPixel(self, x, y):
     return self.board[y][x]
@@ -92,7 +111,7 @@ class game:
     self.displayBoard[y][x*2] = content
   def setDisplayPixelNoScaling(self, x, y, content):
     self.displayBoard[y][x] = content
-  
+
   #get the value of a pixel on the screen
   def getDisplayPixel(self, x, y):
     return self.displayBoard[y][x]
@@ -104,33 +123,46 @@ class game:
     #minus the length
     if self.options["create_barriers"] == "False":
       randint = random.randint(1,pixels-self.length)
+      counter = 1
+      break_ = False
+      for y in range(0, self.height):
+        for x in range(0, self.width):
+          #checks to see if tile is elegible
+          if self.board[y][x] == 0:
+            #checks to see if the random number == the counter
+            if randint == counter:
+              #places food if condition is satisfied
+              self.setPixel(x, y, -1)
+              self.setDisplayPixel(x, y, "$")
+              break_ = True
+              break
+            #increase the counter if condition not satisfied
+            counter = counter + 1
+        if break_ == True:
+          break
     else:
       barriercount = math.floor(self.score/2)
       randint = random.randint(1,pixels-self.length- barriercount)
-    counter = 1
-    break_ = False
-    for y in range(0, self.height):
-      for x in range(0, self.width):
-        #checks to see if tile is elegible
-        if self.board[y][x] == 0:
-          #checks to see if the random number == the counter
-          if randint == counter:
-            #places food if condition is satisfied
-            self.setPixel(x, y, -1)
-            self.setDisplayPixel(x, y, "$")
-            break_ = True
+      for i in range(0, 100):
+        counter = 1
+        break_ = False
+        for y in range(0, self.height):
+          for x in range(0, self.width):
+            #checks to see if tile is elegible
+            if self.board[y][x] == 0:
+              #checks to see if the random number == the counter
+              if randint == counter:
+                #places food if condition is satisfied
+                self.setPixel(x, y, -1)
+                self.setDisplayPixel(x, y, "$")
+                break_ = True
+                break
+              #increase the counter if condition not satisfied
+              counter = counter + 1
+          if break_ == True:
             break
-          #increase the counter if condition not satisfied
-          counter = counter + 1
-      if break_ == True:
-        break
-    
-    #iterate through the board
-    for y in range(0, self.height):
-      for x in range(0, self.width):
-        #if pixel contains a snake piece, increase the time until it despawns
-        if self.getPixel(x, y) > 0:
-          self.setPixel(x, y, self.getPixel(x, y)+1)
+        if break_ == True:
+          break
 
   #this function generates a barrier, which is basically
   #the same as the previous function
@@ -158,14 +190,14 @@ class game:
           counter = counter + 1
       if break_ == True:
         break
-    
+
     #iterate through the board
     for y in range(0, self.height):
       for x in range(0, self.width):
         #if pixel contains a snake piece, increase the time until it despawns
         if self.getPixel(x, y) > 0:
           self.setPixel(x, y, self.getPixel(x, y)+1)
-  
+
   #function to set up game
   def setupGame(self):
     #calculate where to place main window
@@ -234,18 +266,25 @@ class game:
       self.generateFood()
       self.length = self.length + 1
       self.score = self.score + 1
+      #iterate through the board
+      for y in range(0, self.height):
+        for x in range(0, self.width):
+          #if pixel contains a snake piece, increase the time until it despawns
+          if self.getPixel(x, y) > 0:
+            self.setPixel(x, y, self.getPixel(x, y)+1)
 
       #place a barrier every other point
-      if self.score%2 == 0:
-        self.generateBarrier()
+      if self.options["create_barriers"] == "True":
+        if self.score%2 == 0:
+          self.generateBarrier()
 
       #calculate diffuculty, ignore if disabled
-      if self.options["increase_difficulty"] == True:
+      if self.options["increase_difficulty"] == "True":
         if self.score%5 == 0:
           self.diffuculty = self.diffuculty+1
           #change amount of delay depending on diffuculty
           self.delay = int(50*(0.85**self.diffuculty))
-    
+
     #iterates through board and decreases the ticks remaining
     #for each part of the snake
     for y in range(0, self.height):
@@ -258,11 +297,11 @@ class game:
             self.setDisplayPixel(x, y, " ")
             #fix this later plz
             self.setDisplayPixelNoScaling(x*2-1, y, " ")
-    
+
     #checks if snake has run into a barrier
     if self.board[self.head[1]][self.head[0]] == -2:
       return False
-    
+
     #checks to see if snake has run into itself
     if self.board[self.head[1]][self.head[0]] > 0:
       return False
@@ -270,7 +309,7 @@ class game:
       for x in range(0, self.width):
         if self.getPixel(x, y) == -1:
           self.setDisplayPixel(x, y, "$")
-    
+
     #updates location of head internally
     self.setPixel(self.head[0], self.head[1], self.length)
 
@@ -301,7 +340,7 @@ class game:
       #basically the same code as above
       elif sorted([self.direction, self.data["directionalOpposites"][self.previousDirection]]) == sorted(self.data["south-west"]):
         self.setDisplayPixel(previousX, previousY, self.data["displayCharactersASCII"]["south-west"])
-        
+
       elif sorted([self.direction, self.data["directionalOpposites"][self.previousDirection]]) == sorted(self.data["north-east"]):
         self.setDisplayPixel(previousX, previousY, self.data["displayCharactersASCII"]["north-east"])
         self.setDisplayPixelNoScaling(previousX*2-1, previousY, " ")
@@ -309,14 +348,14 @@ class game:
       elif sorted([self.direction, self.data["directionalOpposites"][self.previousDirection]]) == sorted(self.data["south-east"]):
         self.setDisplayPixel(previousX, previousY, self.data["displayCharactersASCII"]["south-east"])
         self.setDisplayPixelNoScaling(previousX*2-1, previousY, " ")
-        
+
       else: #fall back to using #
         self.setDisplayPixel(previousX, previousY, "#")
 
     #return True if tick successful
     self.previousDirection = self.direction[:]
     return True
-  
+
   def gameOverHandler(self):
     #turn off nodelay mode for game window
     self.gameWindow.nodelay(False)
@@ -340,11 +379,11 @@ class game:
 
     #create window for title
     self.titleWindow = curses.newwin(7, titleLength+1, 0, x)
-    
+
     #add text to window
     for i in range(0, len(self.data["titleText"])):
       self.titleWindow.addstr(i, 0, self.data["titleText"][i])
-    
+
     #create window displaying main menu text
     self.mainMenuWindow = curses.newwin(self.rows, self.cols, 8, 0)
 
@@ -379,7 +418,7 @@ class game:
     #set up options menu
     self.optionsMenu.setTitle("Configure game:")
     self.optionsMenu.setFooter("Use arrow keys to navigate. Enter to select. X to exit.")
-    
+
     #set items
     for item in items:
       self.optionsMenu.appendItem(item)
@@ -403,20 +442,20 @@ class game:
         submenu = menu.Menu(submenuWindow)
         submenu.setTitle("Submenu: "+item["name"])
         submenu.setFooter("Use arrow keys to navigate. Enter to select. X to exit.")
-        
+
         #create items in submenu
         if item["type"] == "toggle":
           submenu.items = ["True", "False", "Back"]
         elif item["type"] == "choice":
           submenu.items = item["choices"] + ["Back"]
-        
+
         #hide main options menu
         self.optionsMenuWindow.clear()
         self.optionsMenuWindow.refresh()
 
         #show submenu
         submenu.refresh()
-        
+
         #main loop for submenu
         while True:
           #get key
@@ -452,7 +491,7 @@ class game:
             break
           else:
             continue
-          
+
           submenu.refresh()
         self.saveOptions()
 
@@ -462,13 +501,18 @@ class game:
       #refresh
       self.optionsMenu.refresh()
 
+    #apply new options when done
+    self.applyOptions()
+
     #hide windows
     self.optionsMenuWindow.clear()
     self.optionsMenuWindow.refresh()
 
-  def saveOptions(self):
+  def saveOptions(self, options=None):
+    if options == None:
+      options = self.options
     with open('options.json', 'w') as outfile:
-      json.dump(self.options, outfile)
+      json.dump(options, outfile)
 
   def loadOptions(self):
     optionsFile = open("options.json")
@@ -505,7 +549,7 @@ class game:
             self.printBoard()
             #reset the timer of the other thread
             self.resetTimer = True
-        
+
       #break if key x is pressed
       elif keyString == "x":
         self.stop = True
@@ -514,7 +558,7 @@ class game:
 
       #sleep for a bit so we don't waste cpu
       time.sleep(0.01)
-        
+
   #main program function
   def main(self):
     #show main menu screen
@@ -567,8 +611,8 @@ if __name__ == "__main__":
     game()
     #when game ends quit curses
     curses.endwin()
-  
+
   #quit curses and print exception if there was an error
-  except Exception: 
+  except Exception:
     curses.endwin()
-    traceback.print_exc()  
+    traceback.print_exc()
