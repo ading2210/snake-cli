@@ -42,7 +42,7 @@
       "name": "Gradually speed up snake",
       "id":"increase_difficulty",
       "type": "toggle",
-      "default": "true"
+      "default": "True"
     },
     {
       "name": "Snake speed",
@@ -55,14 +55,7 @@
       "name": "Generate barriers",
       "id":"create_barriers",
       "type": "toggle",
-      "default": "false"
-    },
-    {
-      "name": "test",
-      "id":"placeholder_option",
-      "type": "choice",
-      "choices": ["a", "b", "c"],
-      "default": "a"
+      "default": "False"
     }
   ]
 }

@@ -51,24 +51,27 @@ class Menu:
 
     #draw title
     self.window.addstr(0, x, self.title, curses.A_BOLD)
+
+    #draw spacer
+    self.window.addstr(1, 0, "═"*self.cols)
   
     #create menu items
     for i in range(0, len(self.items)):
       item = self.items[i]
       if type(item) is dict:
-        self.window.addstr(i+1, 0, item["name"])
+        self.window.addstr(i+2, 0, item["name"])
       else:
-        self.window.addstr(i+1, 0, item)
+        self.window.addstr(i+2, 0, item)
     
     #create text at bottom of screen
     self.window.addstr(self.window.getmaxyx()[0]-2, 0, self.footer)
 
     #do highlighting
     for i in range(0, len(self.items)):
-      self.window.chgat(i+1, 0, -1, curses.A_NORMAL)
-    self.window.chgat(self.index+1, 0, -1, curses.A_REVERSE)
+      self.window.chgat(i+2, 0, -1, curses.A_NORMAL)
+    self.window.chgat(self.index+2, 0, -1, curses.A_REVERSE)
     if self.selected > -1:
-      self.window.chgat(self.selected+1, 0, -1, curses.A_UNDERLINE)
+      self.window.chgat(self.selected+2, 0, -1, curses.A_UNDERLINE)
 
     #refresh window
     self.window.refresh()

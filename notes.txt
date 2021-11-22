@@ -4,5 +4,26 @@ Data format for the board:
  - 0 = nothing
  - 1+ = part of the snake - the number represents the number of ticks until the snake part disappears
 
+Data format for options menu items:
+ - Multiple choice
+  {
+    "name": "multiple choice",
+    "id":"multple_choice",
+    "type": "choice",
+    "choices": ["a", "b", "c"],
+    "default": "a"
+  }
+ - True/False
+  {
+    "name": " true/false",
+    "id":"boolean",
+    "type": "toggle",
+    "default": "True"
+  }
+
+Note for generic menu items:
+ - Both str and dict work, the only thing that is displayed for dicts is the "name" value
+
 TODO:
  - make sure player doesn't get softlocked in barrier mode
+ - make sure barriers dont touch each other

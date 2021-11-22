@@ -421,7 +421,11 @@ class game:
 
     #set items
     for item in items:
+      item["oldName"] = item["name"]
+      item["name"] = item["name"]+" ({value})".format(value=self.options[item["id"]])
       self.optionsMenu.appendItem(item)
+    self.optionsMenu.appendItem("─"*self.cols)
+    self.optionsMenu.appendItem("Save and exit")
     self.optionsMenu.refresh()
 
     #loop to handle inputs
@@ -432,11 +436,21 @@ class game:
         break
       elif key == 65: #up
         self.optionsMenu.decreaseIndex()
+        if self.optionsMenu.currentItem() == "─"*self.cols:
+          self.optionsMenu.decreaseIndex()
       elif key == 66: #down
         self.optionsMenu.increaseIndex()
+        if self.optionsMenu.currentItem() == "─"*self.cols:
+          self.optionsMenu.increaseIndex()
 
       elif key == 10 or key == 13: #enter
-        item = items[self.optionsMenu.index]
+        item = self.optionsMenu.items[self.optionsMenu.index]
+        #if exit is selected, then break
+        if item == "Save and exit":
+          break
+        elif item == "─"*self.cols:
+          continue
+
         #create submenu
         submenuWindow = curses.newwin(self.rows, self.cols, 0, 0)
         submenu = menu.Menu(submenuWindow)
@@ -445,9 +459,11 @@ class game:
 
         #create items in submenu
         if item["type"] == "toggle":
-          submenu.items = ["True", "False", "Back"]
+          submenu.items = ["True", "False", "─"*self.cols]
+          submenu.items = submenu.items + ["<- Back"]
         elif item["type"] == "choice":
-          submenu.items = item["choices"] + ["Back"]
+          submenu.items = item["choices"] + ["─"*self.cols]
+          submenu.items = submenu.items + ["<- Back"]
 
         #hide main options menu
         self.optionsMenuWindow.clear()
@@ -466,8 +482,12 @@ class game:
             break
           elif key == 65: #up
             submenu.decreaseIndex()
+            if submenu.currentItem() == "─"*self.cols:
+              submenu.decreaseIndex()
           elif key == 66: #down
             submenu.increaseIndex()
+            if submenu.currentItem() == "─"*self.cols:
+              submenu.increaseIndex()
 
           #this is run when the enter key is pressed
           elif key == 10 or key == 13:
@@ -477,7 +497,7 @@ class game:
             #if it is a string, then proceed
             if type(currentItem) is str:
               #break if back is selected
-              if currentItem == "Back":
+              if currentItem == "<- Back":
                 break
               else:
                 optionsMenuItems = self.data["optionsMenuItems"]
@@ -491,10 +511,16 @@ class game:
             break
           else:
             continue
-
           submenu.refresh()
-        self.saveOptions()
-
+        
+        #update menu with new options
+        counter = 0
+        for item in items:
+          if item == "Save and exit.":
+            continue
+          item["name"] = item["oldName"]+" ({value})".format(value=self.options[item["id"]])
+          self.optionsMenu.editItem(item, counter)
+          counter = counter+1
       else:
         continue
 
