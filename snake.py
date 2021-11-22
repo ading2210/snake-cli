@@ -542,6 +542,7 @@ class game:
       self.optionsMenu.refresh()
 
     #apply new options when done
+    self.saveOptions()
     self.applyOptions()
 
     #hide windows
