@@ -27,6 +27,13 @@ Data format for options menu items:
     "type": "text",
     "default": ["text goes here"]
   }
+ - Horizontal line:
+  {
+    "name": "line",
+    "id":"line1",
+    "type": "line",
+    "default": ""
+  }
 
 Note for generic menu items:
  - Both str and dict work, the only thing that is displayed for dicts is the "name" value

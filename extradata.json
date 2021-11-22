@@ -59,6 +59,12 @@
       "default": "False"
     },
     {
+      "name": "line",
+      "id":"line1",
+      "type": "line",
+      "default": ""
+    },
+    {
       "name": "Credits",
       "id":"credits",
       "type": "text",
@@ -71,6 +77,17 @@
       "Repl.it: @UniqueOstrich18",
       "Github: ading2210",
       "Discord: vk6#7391"]
+    },
+    {
+      "name": "Controls",
+      "id":"controls",
+      "type": "text",
+      "default": 
+      [" - WASD to move snake",
+      " - X to quit game",
+      "",
+      "Tip: You can make the snake move faster by moving it",
+      "in the same direction it is already going in."]
     }
   ]
 }

@@ -40,6 +40,13 @@ class Menu:
 
   def currentItem(self):
     return self.items[self.index]
+  
+  def currentItemText(self):
+    currentItem = self.currentItem()
+    if type(currentItem) is dict:
+      return currentItem["name"]
+    else:
+      return currentItem
 
   def refresh(self):
     #clear window

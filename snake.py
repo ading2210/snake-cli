@@ -426,6 +426,10 @@ class game:
 
     #set items
     for item in items:
+      if item["type"] == "line":
+        item = "─"*self.cols
+        self.optionsMenu.appendItem(item)
+        continue
       item["oldName"] = item["name"]
       if item["type"] != "text":
         item["name"] = item["name"]+" ({value})".format(value=self.options[item["id"]])
@@ -442,11 +446,11 @@ class game:
         break
       elif key == 65: #up
         self.optionsMenu.decreaseIndex()
-        if self.optionsMenu.currentItem() == "─"*self.cols:
+        if self.optionsMenu.currentItemText() == "─"*self.cols:
           self.optionsMenu.decreaseIndex()
       elif key == 66: #down
         self.optionsMenu.increaseIndex()
-        if self.optionsMenu.currentItem() == "─"*self.cols:
+        if self.optionsMenu.currentItemText() == "─"*self.cols:
           self.optionsMenu.increaseIndex()
 
       elif key == 10 or key == 13: #enter
@@ -468,6 +472,7 @@ class game:
           submenu.items = ["True", "False", "─"*self.cols] + ["<- Back"]
         elif item["type"] == "choice":
           submenu.items = item["choices"] + ["─"*self.cols] + ["<- Back"]
+          
         elif item["type"] == "text":
           submenu.items = item["default"]
           submenu.items = submenu.items + ["─"*self.cols] + ["<- Back"]
@@ -494,7 +499,7 @@ class game:
               submenu.decreaseIndex()
               if submenu.currentItem() == "─"*self.cols:
                 submenu.decreaseIndex()
-            elif key == 66: #down
+            if key == 66: #down
               submenu.increaseIndex()
               if submenu.currentItem() == "─"*self.cols:
                 submenu.increaseIndex()
@@ -505,32 +510,30 @@ class game:
 
             #check the type of the item
             #if it is a string, then proceed
-            if type(currentItem) is str:
-              #break if back is selected
-              if currentItem == "<- Back":
-                break
-              else:
-                optionsMenuItems = self.data["optionsMenuItems"]
-                #change the appropriate value in the options
-                for menuItem in optionsMenuItems:
-                  if menuItem["name"] == item["name"]:
-                    self.options[menuItem["id"]] = currentItem
-                    break
-            elif type(currentItem) is dict:
+            #break if back is selected
+            if currentItem == "<- Back":
+              break
+            else:
+              optionsMenuItems = self.data["optionsMenuItems"]
+              #change the appropriate value in the options
+              for menuItem in optionsMenuItems:
+                if menuItem["name"] == item["name"]:
+                  self.options[menuItem["id"]] = currentItem
+                  break
+            if type(currentItem) is dict:
               pass
             break
-          else:
-            continue
           submenu.refresh()
         
         #update menu with new options
         counter = 0
-        for item in items:
-          if item == "Save and exit.":
-            continue
-          if item["type"] != "text":
-            item["name"] = item["oldName"]+" ({value})".format(value=self.options[item["id"]])
-          self.optionsMenu.editItem(item, counter)
+        for item in self.optionsMenu.items:
+          if type(item) is dict:
+            if item == "Save and exit.":
+              continue
+            if item["type"] != "text":
+              item["name"] = item["oldName"]+" ({value})".format(value=self.options[item["id"]])
+            self.optionsMenu.editItem(item, counter)
           counter = counter+1
       else:
         continue
