@@ -20,3 +20,8 @@ Play it at https://replit.com/@UniqueOstrich18/CLI-Snake
  - Built in options menu
  - Customizable difficulty
  - Barrier mode also available
+
+### Installing and running
+ 1. If on Windows you must install curses by running `pip3 install windows-curses`.
+ 2. Clone this repository. 
+ 3. Run `python3 snake.py` to run the game.
