@@ -435,6 +435,7 @@ class game:
         item["name"] = item["name"]+" ({value})".format(value=self.options[item["id"]])
       self.optionsMenu.appendItem(item)
     self.optionsMenu.appendItem("─"*self.cols)
+    self.optionsMenu.appendItem("Reset to default")
     self.optionsMenu.appendItem("Save and exit")
     self.optionsMenu.refresh()
 
@@ -458,78 +459,83 @@ class game:
         #if exit is selected, then break
         if item == "Save and exit":
           break
+        elif item == "Reset to default":
+          self.saveOptions(options=self.defaultOptions)
+          self.options = dict(self.defaultOptions)
         elif item == "─"*self.cols:
           continue
+        else:
+          #create submenu
+          submenuWindow = curses.newwin(self.rows, self.cols, 0, 0)
+          submenu = menu.Menu(submenuWindow)
+          submenu.setTitle("Submenu: "+item["name"])
+          submenu.setFooter("Use arrow keys to navigate. Enter to select. X to exit.")
 
-        #create submenu
-        submenuWindow = curses.newwin(self.rows, self.cols, 0, 0)
-        submenu = menu.Menu(submenuWindow)
-        submenu.setTitle("Submenu: "+item["name"])
-        submenu.setFooter("Use arrow keys to navigate. Enter to select. X to exit.")
+          #create items in submenu
+          if item["type"] == "toggle":
+            submenu.items = ["True", "False", "─"*self.cols] + ["<- Back"]
+          elif item["type"] == "choice":
+            submenu.items = item["choices"] + ["─"*self.cols] + ["<- Back"]
+            
+          elif item["type"] == "text":
+            submenu.items = item["default"]
+            submenu.items = submenu.items + ["─"*self.cols] + ["<- Back"]
 
-        #create items in submenu
-        if item["type"] == "toggle":
-          submenu.items = ["True", "False", "─"*self.cols] + ["<- Back"]
-        elif item["type"] == "choice":
-          submenu.items = item["choices"] + ["─"*self.cols] + ["<- Back"]
-          
-        elif item["type"] == "text":
-          submenu.items = item["default"]
-          submenu.items = submenu.items + ["─"*self.cols] + ["<- Back"]
+          #hide main options menu
+          self.optionsMenuWindow.clear()
+          self.optionsMenuWindow.refresh()
 
-        #hide main options menu
-        self.optionsMenuWindow.clear()
-        self.optionsMenuWindow.refresh()
-
-        #show submenu
-        if item["type"] == "text":
-          submenu.decreaseIndex()
-        submenu.refresh()
-
-        #main loop for submenu
-        while True:
-          #get key
-          key = submenuWindow.getch()
-
-          #if x is pressed then exit menu
-          if key == ord("x"):
-            break
-          if item["type"] != "text":
-            if key == 65: #up
-              submenu.decreaseIndex()
-              if submenu.currentItem() == "─"*self.cols:
-                submenu.decreaseIndex()
-            if key == 66: #down
-              submenu.increaseIndex()
-              if submenu.currentItem() == "─"*self.cols:
-                submenu.increaseIndex()
-
-          #this is run when the enter key is pressed
-          if key == 10 or key == 13:
-            currentItem = submenu.currentItem()
-
-            #check the type of the item
-            #if it is a string, then proceed
-            #break if back is selected
-            if currentItem == "<- Back":
-              break
-            else:
-              optionsMenuItems = self.data["optionsMenuItems"]
-              #change the appropriate value in the options
-              for menuItem in optionsMenuItems:
-                if menuItem["name"] == item["name"]:
-                  self.options[menuItem["id"]] = currentItem
-                  break
-            if type(currentItem) is dict:
-              pass
-            break
+          #show submenu
+          if item["type"] == "text":
+            submenu.decreaseIndex()
           submenu.refresh()
+
+          #main loop for submenu
+          while True:
+            #get key
+            key = submenuWindow.getch()
+
+            #if x is pressed then exit menu
+            if key == ord("x"):
+              break
+            if item["type"] != "text":
+              if key == 65: #up
+                submenu.decreaseIndex()
+                if submenu.currentItem() == "─"*self.cols:
+                  submenu.decreaseIndex()
+              if key == 66: #down
+                submenu.increaseIndex()
+                if submenu.currentItem() == "─"*self.cols:
+                  submenu.increaseIndex()
+
+            #this is run when the enter key is pressed
+            if key == 10 or key == 13:
+              currentItem = submenu.currentItem()
+
+              #check the type of the item
+              #if it is a string, then proceed
+              #break if back is selected
+              if currentItem == "<- Back":
+                break
+              else:
+                optionsMenuItems = self.data["optionsMenuItems"]
+                #change the appropriate value in the options
+                for menuItem in optionsMenuItems:
+                  if menuItem["name"] == item["name"]:
+                    self.options[menuItem["id"]] = currentItem
+                    break
+              if type(currentItem) is dict:
+                pass
+              break
+            submenu.refresh()
         
         #update menu with new options
         counter = 0
         for item in self.optionsMenu.items:
           if type(item) is dict:
             if item == "Save and exit.":
+              continue
+            elif item == "Reset to default":
               continue
             if item["type"] != "text":
               item["name"] = item["oldName"]+" ({value})".format(value=self.options[item["id"]])
