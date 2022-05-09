@@ -118,85 +118,54 @@ class game:
 
   #function to generate a food pellet
   def generateFood(self):
-    pixels = self.width*self.height
-    #gets a random number between 1 and the number of pixels
-    #minus the length
-    if self.options["create_barriers"] == "False":
-      randint = random.randint(1,pixels-self.length)
-      counter = 1
-      break_ = False
-      for y in range(0, self.height):
-        for x in range(0, self.width):
-          #checks to see if tile is elegible
-          if self.board[y][x] == 0:
-            #checks to see if the random number == the counter
-            if randint == counter:
-              #places food if condition is satisfied
-              self.setPixel(x, y, -1)
-              self.setDisplayPixel(x, y, "$")
-              break_ = True
-              break
-            #increase the counter if condition not satisfied
-            counter = counter + 1
-        if break_ == True:
+    eligible_tiles = []
+    for y in range(0, self.height):
+      for x in range(0, self.width):
+        #checks to see if tile is eligible
+        if y >= self.height or x < 0:
+          continue
+        elif y >= self.width or x < 0:
           break
-    else:
-      barriercount = math.floor(self.score/2)
-      randint = random.randint(1,pixels-self.length- barriercount)
-      for i in range(0, 100):
-        counter = 1
-        break_ = False
-        for y in range(0, self.height):
-          for x in range(0, self.width):
-            #checks to see if tile is elegible
-            if self.board[y][x] == 0:
-              #checks to see if the random number == the counter
-              if randint == counter:
-                #places food if condition is satisfied
-                self.setPixel(x, y, -1)
-                self.setDisplayPixel(x, y, "$")
-                break_ = True
-                break
-              #increase the counter if condition not satisfied
-              counter = counter + 1
-          if break_ == True:
-            break
-        if break_ == True:
+        if self.board[y][x] != 0:
           break
+        #if so, then the tile is appended to a list of eligible tiles
+        eligible_tiles.append((y,x))
+
+    if len(eligible_tiles) > 0:
+      #one tile is chosen and the barrier is placed
+      y, x = random.choice(eligible_tiles)
+      self.setPixel(x, y, -1)
+      self.setDisplayPixel(x, y, "$")
 
   #this function generates a barrier, which is basically
   #the same as the previous function
   def generateBarrier(self):
-    pixels = self.width*self.height
-    #gets a random number between 1 and the number of pixels
-    #minus the length plus the food
-    barriercount = math.floor(self.score/2)
-    randint = random.randint(1,pixels-self.length-1- barriercount)
-    counter = 1
-    break_ = False
+    eligible_tiles = []
     for y in range(0, self.height):
       for x in range(0, self.width):
-        #checks to see if tile is elegible
-        if self.board[y][x] == 0:
-          #checks to see if the random number == the counter
-          if randint == counter:
-            #places food if condition is satisfied
-            self.setPixel(x, y, -2)
-            self.setDisplayPixel(x, y, self.data["displayCharactersASCII"]["barrier"])
-            self.setDisplayPixelNoScaling(x*2-1, y, self.data["displayCharactersASCII"]["barrier"])
-            break_ = True
+        #checks to see if tile is eligible
+        tiles = ((y+1,x),(y-1,x),(y,x+1),(y,x-1),(y,x))
+        counter = 0
+        #checks every adjacent tile to see if it is occupied
+        for tile in tiles:
+          if tile[0] >= self.height or tile[0] < 0:
             break
-          #increase the counter if condition not satisfied
-          counter = counter + 1
-      if break_ == True:
-        break
+          elif tile[1] >= self.width or tile[1] < 0:
+            break
+          if self.board[tile[0]][tile[1]] != 0:
+            break
+          counter += 1
+        #if all adjacent tiles are empty, the tile is appended
+        #to a list of eligible tiles
+        if counter == 5:
+          eligible_tiles.append((y,x))
 
-    #iterate through the board
-    for y in range(0, self.height):
-      for x in range(0, self.width):
-        #if pixel contains a snake piece, increase the time until it despawns
-        if self.getPixel(x, y) > 0:
-          self.setPixel(x, y, self.getPixel(x, y)+1)
+    if len(eligible_tiles) > 0:
+      #one tile is chosen and the barrier is placed
+      y, x = random.choice(eligible_tiles)
+      self.setPixel(x, y, -2)
+      self.setDisplayPixel(x, y, self.data["displayCharactersASCII"]["barrier"])
+      self.setDisplayPixelNoScaling(x*2-1, y, self.data["displayCharactersASCII"]["barrier"])
 
   #function to set up game
   def setupGame(self):
@@ -559,7 +528,7 @@ class game:
     if options == None:
       options = self.options
     with open('options.json', 'w') as outfile:
-      json.dump(options, outfile)
+      json.dump(options, outfile, indent=2)
 
   def loadOptions(self):
     optionsFile = open("options.json")
