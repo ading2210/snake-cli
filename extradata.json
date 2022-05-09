@@ -46,6 +46,12 @@
       "default": "True"
     },
     {
+      "name": "Extra turn before hitting a obstacle",
+      "id":"extra_turn",
+      "type": "toggle",
+      "default": "True"
+    },
+    {
       "name": "Snake speed",
       "id":"speed",
       "type": "choice",
@@ -69,14 +75,13 @@
       "id":"credits",
       "type": "text",
       "default": 
-      ["All programing has been done by me.",
+      ["All programming has been done by me.",
       "The curses library is used for input handling",
       "and displaying graphics.",
       "",
       "Accounts:",
       "Repl.it: @UniqueOstrich18",
-      "Github: ading2210",
-      "Discord: vk6#7391"]
+      "Github: ading2210"]
     },
     {
       "name": "Controls",

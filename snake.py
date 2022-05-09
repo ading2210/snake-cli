@@ -51,6 +51,8 @@ class game:
     self.score = 0
     self.diffuculty = 0
     self.delay = 50
+    self.extra_turn = False
+    self.extra_turn_active = False
 
     self.applyOptions()
 
@@ -71,6 +73,9 @@ class game:
       self.delay = 30
     elif self.options["speed"] == "Slow":
       self.delay = 75
+    if self.options["extra_turn"] == "True":
+      self.extra_turn == True
+      self.extra_turn_active = False
 
   #function to set up curses
   def setupCurses(self):
@@ -209,26 +214,36 @@ class game:
     #run into the border
     previousX = self.head[0]
     previousY = self.head[1]
+    newHead = self.head[:]
     if self.direction == "east":
       #move self.head
-      self.head[0] = self.head[0]+1
+      newHead[0] = self.head[0]+1
       #checks if head is next to wall
-      if self.head[0] == self.width:
+      if newHead[0] >= self.width:
         #if so, then game over
         return False
     #above comments applicable to code below
     elif self.direction == "west":
-      self.head[0] = self.head[0]-1
-      if self.head[0] == -1:
+      newHead[0] = self.head[0]-1
+      if newHead[0] <= -1:
         return False
     elif self.direction == "north":
-      self.head[1] = self.head[1]-1
-      if self.head[1] == -1:
+      newHead[1] = self.head[1]-1
+      if newHead[1] <= -1:
         return False
     else: #note: fallback direction is south
-      self.head[1] = self.head[1]+1
-      if self.head[1] == self.height:
+      newHead[1] = self.head[1]+1
+      if newHead[1] >= self.height:
         return False
+    #checks if snake has run into a barrier
+    if self.board[newHead[1]][newHead[0]] == -2:
+      return False
+
+    #checks to see if snake has run into itself
+    if self.board[newHead[1]][newHead[0]] > 0:
+      return False
+
+    self.head = newHead[:]
 
     #checks if snake has run into food and update score
     if self.board[self.head[1]][self.head[0]] == -1:
@@ -266,14 +281,8 @@ class game:
             self.setDisplayPixel(x, y, " ")
             #fix this later plz
             self.setDisplayPixelNoScaling(x*2-1, y, " ")
-
-    #checks if snake has run into a barrier
-    if self.board[self.head[1]][self.head[0]] == -2:
-      return False
-
-    #checks to see if snake has run into itself
-    if self.board[self.head[1]][self.head[0]] > 0:
-      return False
+            
+    #display food
     for y in range(0, self.height):
       for x in range(0, self.width):
         if self.getPixel(x, y) == -1:
@@ -535,6 +544,10 @@ class game:
     self.options = json.load(optionsFile)
     optionsFile.close()
 
+    for option in self.data["optionsMenuItems"]:
+      if not option["id"] in self.options:
+        self.options[option["id"]] = option["default"]
+
   def getInput(self):
     while True:
       #get keyboard input
@@ -594,7 +607,12 @@ class game:
     self.thread.start()
 
     #start main program loop
+    tickCounter = 0
     while True:
+      #debug code
+      #tickCounter += 1
+      #self.gameWindow.addstr(0, 0, str(tickCounter))
+      
       #idk how to do fancy stuff with threading, this works anyways
       #basically it sleeps for a bit and checks if the timer
       #has to be reset due to an input
@@ -612,9 +630,16 @@ class game:
 
       #run a tick and stop if game over
       if self.tick() == False:
-        self.gameOverHandler()
-        self.stop = True
-        break
+        #do not game over if the extra turn is enabled
+        if not self.extra_turn and self.extra_turn_active == False:
+          self.extra_turn_active = True
+        else:
+          self.gameOverHandler()
+          self.stop = True
+          break
+        #break
+      else:
+        self.extra_turn_active = False
 
       #refresh the board
       self.printBoard()
