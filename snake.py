@@ -614,8 +614,8 @@ class game:
     tickCounter = 0
     while True:
       #debug code
-      tickCounter += 1
-      self.gameWindow.addstr(0, 0, str(tickCounter))
+      #tickCounter += 1
+      #self.gameWindow.addstr(0, 0, str(tickCounter))
       
       #idk how to do fancy stuff with threading, this works anyways
       #basically it sleeps for a bit and checks if the timer
