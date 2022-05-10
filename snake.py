@@ -74,7 +74,7 @@ class game:
     elif self.options["speed"] == "Slow":
       self.delay = 75
     if self.options["extra_turn"] == "True":
-      self.extra_turn == True
+      self.extra_turn = True
       self.extra_turn_active = False
 
   #function to set up curses
@@ -149,7 +149,8 @@ class game:
     for y in range(0, self.height):
       for x in range(0, self.width):
         #checks to see if tile is eligible
-        tiles = ((y+1,x),(y-1,x),(y,x+1),(y,x-1),(y,x))
+        tiles = ((y+1,x),(y-1,x),(y,x+1),(y,x-1),(y,x),
+                 (y+1,x-1),(y+1,x+1),(y-1,x-1),(y-1,x+1))
         counter = 0
         #checks every adjacent tile to see if it is occupied
         for tile in tiles:
@@ -591,6 +592,7 @@ class game:
   #main program function
   def main(self):
     #show main menu screen
+    curses.flushinp()
     key = self.mainMenuHandler()
     #show options screen if key pressed
     if key == "c":
@@ -612,8 +614,8 @@ class game:
     tickCounter = 0
     while True:
       #debug code
-      #tickCounter += 1
-      #self.gameWindow.addstr(0, 0, str(tickCounter))
+      tickCounter += 1
+      self.gameWindow.addstr(0, 0, str(tickCounter))
       
       #idk how to do fancy stuff with threading, this works anyways
       #basically it sleeps for a bit and checks if the timer
@@ -633,7 +635,7 @@ class game:
       #run a tick and stop if game over
       if self.tick() == False:
         #do not game over if the extra turn is enabled
-        if not self.extra_turn and self.extra_turn_active == False:
+        if (self.extra_turn == True and self.extra_turn_active == False):
           self.extra_turn_active = True
         else:
           self.gameOverHandler()
@@ -649,7 +651,7 @@ class game:
     #display game over screen
     curses.flushinp()
     self.gameOverHandler()
-    #curses.napms(1000)
+    curses.napms(250)
 
     #program will terminate after any key pressed
     self.gameWindow.getkey()
