@@ -127,17 +127,12 @@ class game:
     for y in range(0, self.height):
       for x in range(0, self.width):
         #checks to see if tile is eligible
-        if y >= self.height or x < 0:
-          continue
-        elif y >= self.width or x < 0:
-          break
-        if self.board[y][x] != 0:
-          break
-        #if so, then the tile is appended to a list of eligible tiles
-        eligible_tiles.append((y,x))
+        if self.board[y][x] == 0:
+          #if so, then the tile is appended to a list of eligible tiles
+          eligible_tiles.append((y,x))
 
     if len(eligible_tiles) > 0:
-      #one tile is chosen and the barrier is placed
+      #one tile is chosen and the food is placed
       y, x = random.choice(eligible_tiles)
       self.setPixel(x, y, -1)
       self.setDisplayPixel(x, y, "$")
@@ -163,7 +158,7 @@ class game:
           counter += 1
         #if all adjacent tiles are empty, the tile is appended
         #to a list of eligible tiles
-        if counter == 5:
+        if counter == 9:
           eligible_tiles.append((y,x))
 
     if len(eligible_tiles) > 0:
