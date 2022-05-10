@@ -601,6 +601,8 @@ class game:
     #set up game
     self.setupGame()
     self.previousDirection = "east"
+    self.tick()
+    self.printBoard()
 
     #start thread
     self.thread = threading.Thread(target=self.getInput)
@@ -645,8 +647,9 @@ class game:
       self.printBoard()
 
     #display game over screen
+    curses.flushinp()
     self.gameOverHandler()
-    curses.napms(1000)
+    #curses.napms(1000)
 
     #program will terminate after any key pressed
     self.gameWindow.getkey()
