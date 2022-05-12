@@ -258,11 +258,11 @@ class game:
         if self.score%2 == 0:
           self.generateBarrier()
 
-      #calculate diffuculty, ignore if disabled
+      #increase diffuculty, ignore if disabled
       if self.options["increase_difficulty"] == "True":
         if self.score%5 == 0:
           #change amount of delay depending on diffuculty
-          self.delay = int(self.delay*0.85)
+          self.delay = int(self.delay*0.95)
 
     #iterates through board and decreases the ticks remaining
     #for each part of the snake
