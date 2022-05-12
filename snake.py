@@ -49,10 +49,10 @@ class game:
     self.stop = False
     self.resetTimer = False
     self.score = 0
-    self.diffuculty = 0
     self.delay = 50
     self.extra_turn = False
     self.extra_turn_active = False
+    self.inputQueue = []
 
     self.applyOptions()
 
@@ -68,11 +68,11 @@ class game:
 
   def applyOptions(self):
     if self.options["speed"] == "Normal":
-      self.delay = 50
+      self.delay = 25
     elif self.options["speed"] == "Fast":
-      self.delay = 30
+      self.delay = 15
     elif self.options["speed"] == "Slow":
-      self.delay = 75
+      self.delay = 40
     if self.options["extra_turn"] == "True":
       self.extra_turn = True
       self.extra_turn_active = False
@@ -261,9 +261,8 @@ class game:
       #calculate diffuculty, ignore if disabled
       if self.options["increase_difficulty"] == "True":
         if self.score%5 == 0:
-          self.diffuculty = self.diffuculty+1
           #change amount of delay depending on diffuculty
-          self.delay = int(50*(0.85**self.diffuculty))
+          self.delay = int(self.delay*0.85)
 
     #iterates through board and decreases the ticks remaining
     #for each part of the snake
@@ -558,27 +557,16 @@ class game:
         break
 
       #process keyboard input
-      #if input is valid then run a tick
       if keyString in self.data["directionalControls"]:
-        self.direction = self.data["directionalControls"][keyString]
-        #correct direction if move is invalid
-        if self.direction == self.data["directionalOpposites"][self.previousDirection]:
-          self.direction = self.previousDirection[:]
-        else:
-          #run tick
-          tick = self.tick()
-          #if player loses, break fron loop
-          if tick == False:
-            self.stop = True
-          else: #if not then refresh board
-            self.printBoard()
-            #reset the timer of the other thread
-            self.resetTimer = True
+        newDirection = self.data["directionalControls"][keyString]
+        #if key is valid add it to the input queue
+        if len(self.inputQueue) < 2:
+          self.inputQueue.append(newDirection)
 
       #break if key x is pressed
       elif keyString == "x":
         self.stop = True
-      if self.stop == True:
+        self.resetTimer = True
         break
 
       #sleep for a bit so we don't waste cpu
@@ -601,7 +589,7 @@ class game:
     self.tick()
     self.printBoard()
 
-    #start thread
+    #start thread for input
     self.thread = threading.Thread(target=self.getInput)
     self.thread.start()
 
@@ -626,6 +614,9 @@ class game:
       #stop if this condition is met
       if self.stop == True:
         break
+
+      if len(self.inputQueue) > 0:
+        self.direction = self.inputQueue.pop(0)
 
       #run a tick and stop if game over
       if self.tick() == False:
