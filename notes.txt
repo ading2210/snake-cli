@@ -40,5 +40,3 @@ Note for generic menu items:
 
 TODO:
  - add win detection
- - store high score
- - have an option to restart the game upon death

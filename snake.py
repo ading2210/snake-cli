@@ -1,6 +1,6 @@
 import os, random, json, time, threading, curses, traceback, math, menu, hashlib
 
-class game:
+class Game:
   def __init__(self):
     #load extradata.json
     f = open("extradata.json")
@@ -26,6 +26,16 @@ class game:
     self.width = 17
     self.height = 13
 
+    #set up curses
+    self.setupCurses()
+
+    #ansi escape codes to hightlight stuff
+    self.hightlight = "\033[7m"
+    self.reset = "\033[0m"
+    
+    self.resetGame()
+
+  def resetGame(self):
     #create blank board to be used internally
     self.blankBoard = []
     for y in range(0, self.height):
@@ -58,15 +68,6 @@ class game:
 
     self.applyOptions()
 
-    #set up curses
-    self.setupCurses()
-
-    #start main program loop
-    self.main()
-
-    #ansi escape codes to hightlight stuff
-    self.hightlight = "\033[7m"
-    self.reset = "\033[0m"
 
   def applyOptions(self):
     if self.options["speed"] == "Normal":
@@ -348,15 +349,16 @@ class game:
     self.gameWindow.nodelay(False)
 
     #calculate where to place window
-    text = "GAME OVER"
-    windowHeight = 3
+    windowHeight = 4
+    windowWidth = 20
     y = int(round((self.height+2)/2 - windowHeight/2))
-    x = int(round((self.width*2+2)/2 - (len(text)+2)/2)) + self.windowStart
+    x = int(round((self.width*2+2)/2 - (windowWidth)/2)) + self.windowStart
 
     #display a window saying GAME OVER
-    self.gameOverWindow = curses.newwin(windowHeight, len(text)+2, y, x)
+    self.gameOverWindow = curses.newwin(windowHeight, windowWidth, y, x)
     self.gameOverWindow.border()
-    self.gameOverWindow.addstr(1, 1, "GAME OVER")
+    self.gameOverWindow.addstr(1, 1, "    GAME OVER    ")
+    self.gameOverWindow.addstr(2, 1, "Play Again? [Y/N]")
     self.gameOverWindow.refresh()
 
   def mainMenuHandler(self):
@@ -606,7 +608,7 @@ class game:
       return 0
 
   def getInput(self):
-    while True:
+    while self.stop == False:
       #get keyboard input
       key = self.gameWindow.getch()
 
@@ -636,6 +638,7 @@ class game:
 
   #main program function
   def main(self):
+    self.resetGame()
     #show main menu screen
     curses.flushinp()
     key = self.mainMenuHandler()
@@ -699,15 +702,26 @@ class game:
     #display game over screen
     curses.flushinp()
     self.gameOverHandler()
-    curses.napms(250)
 
     #program will terminate after any key pressed
-    self.gameWindow.getkey()
+    self.stop = True
+    self.gameWindow.nodelay(0)
+    while True:
+      char = self.gameWindow.getkey()
+      if char == "y":
+        self.screen.clear()
+        self.screen.refresh()
+        return True
+      elif char == "n":
+        return False
 
 #run the game if this is the main thread
 if __name__ == "__main__":
   try:
-    game()
+    #start main program loop
+    game = Game()
+    while game.main(): pass
+      
     #when game ends quit curses
     curses.endwin()
 
@@ -715,3 +729,4 @@ if __name__ == "__main__":
   except Exception:
     curses.endwin()
     traceback.print_exc()
+    game.stop = True
