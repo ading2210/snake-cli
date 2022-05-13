@@ -69,6 +69,13 @@
       "default": "False"
     },
     {
+      "name": "Play sound when food is eaten",
+      "id":"play_sound",
+      "type": "toggle",
+      "save": true,
+      "default": "True"
+    },
+    {
       "name": "line",
       "id":"line1",
       "type": "line",

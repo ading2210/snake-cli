@@ -66,6 +66,7 @@ class Game:
     self.extra_turn_active = False
     self.inputQueue = []
     self.currentHighScore = 0
+    self.play_sound = False
 
     self.applyOptions()
 
@@ -80,6 +81,8 @@ class Game:
     if self.options["extra_turn"] == "True":
       self.extra_turn = True
       self.extra_turn_active = False
+    if self.options["play_sound"] == "True":
+      self.playSound = True
 
   #function to set up curses
   def setupCurses(self):
@@ -256,6 +259,8 @@ class Game:
       self.generateFood()
       self.length += 1
       self.score += 1
+      if self.playSound == True:
+        curses.beep()
       if self.score > self.currentHighScore:
         self.currentHighScore = self.score
       #iterate through the board
