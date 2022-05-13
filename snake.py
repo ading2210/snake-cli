@@ -1,4 +1,4 @@
-import os, random, json, time, threading, curses, traceback, math, menu, hashlib, copy
+import os, random, json, time, threading, curses, traceback, menu, hashlib, copy
 
 class Game:
   def __init__(self):
@@ -432,6 +432,7 @@ class Game:
       self.optionsMenu.appendItem(newitem)
     self.optionsMenu.appendItem("─"*self.cols)
     self.optionsMenu.appendItem("Reset to default")
+    self.optionsMenu.appendItem("Reset high scores")
     self.optionsMenu.appendItem("Save and exit")
     self.optionsMenu.refresh()
 
@@ -452,7 +453,17 @@ class Game:
 
       elif key == 10 or key == 13: #enter
         item = self.optionsMenu.items[self.optionsMenu.index]
-        #if exit is selected, then break
+        
+        if item == "Reset high scores":
+          if os.path.exists(self.basePath+"/scores.json"):
+             os.remove(self.basePath+"/scores.json")
+          item = {
+            "name": "Reset high scores",
+            "id": "popup",
+            "type": "text",
+            "default": ["The saved high scores have been cleared."],
+            "oldName": "Reset high scores"
+          }
         if item == "Save and exit":
           break
         elif item == "Reset to default":
@@ -461,6 +472,7 @@ class Game:
         elif item == "─"*self.cols:
           continue
         else:
+          #raise Exception(item)
           #create submenu
           submenuWindow = curses.newwin(self.rows, self.cols, 0, 0)
           submenu = menu.Menu(submenuWindow)
