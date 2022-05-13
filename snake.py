@@ -1,4 +1,4 @@
-import os, random, json, time, threading, curses, traceback, math, menu
+import os, random, json, time, threading, curses, traceback, math, menu, hashlib
 
 class game:
   def __init__(self):
@@ -15,7 +15,8 @@ class game:
       self.defaultOptions[item["id"]] = item["default"]
 
     #read options.json
-    if os.path.exists("options.json"):
+    self.basePath = os.path.abspath(os.path.dirname(__file__))
+    if os.path.exists(self.basePath+"/options.json"):
       self.loadOptions()
     else:
       self.saveOptions(options=self.defaultOptions)
@@ -53,6 +54,7 @@ class game:
     self.extra_turn = False
     self.extra_turn_active = False
     self.inputQueue = []
+    self.currentHighScore = 0
 
     self.applyOptions()
 
@@ -91,7 +93,9 @@ class game:
   #function to print board
   def printBoard(self):
     #refresh score display
-    self.scoreDisplay.addstr(0, 0, "Score: "+str(self.score))
+    scoreText = "Score: {score} | Best: {highScore}".format(
+      score=str(self.score), highScore=self.currentHighScore)
+    self.scoreDisplay.addstr(0, 0, scoreText)
     self.scoreDisplay.refresh()
 
     #refresh game window
@@ -170,6 +174,10 @@ class game:
 
   #function to set up game
   def setupGame(self):
+    #load the previous high score
+    self.currentHighScore = self.loadHighScore()
+    self.oldHighScore = self.currentHighScore
+    
     #calculate where to place main window
     windowWidth = self.width*2 + 1
     self.windowStart = int(round(self.cols/2) - round(windowWidth/2))
@@ -244,8 +252,10 @@ class game:
     #checks if snake has run into food and update score
     if self.board[self.head[1]][self.head[0]] == -1:
       self.generateFood()
-      self.length = self.length + 1
-      self.score = self.score + 1
+      self.length += 1
+      self.score += 1
+      if self.score > self.currentHighScore:
+        self.currentHighScore = self.score
       #iterate through the board
       for y in range(0, self.height):
         for x in range(0, self.width):
@@ -330,6 +340,10 @@ class game:
     return True
 
   def gameOverHandler(self):
+    #save the new high score if it is higher than the old one
+    if self.score > self.oldHighScore:
+      self.saveHighScore(self.score)
+    
     #turn off nodelay mode for game window
     self.gameWindow.nodelay(False)
 
@@ -531,17 +545,65 @@ class game:
   def saveOptions(self, options=None):
     if options == None:
       options = self.options
-    with open('options.json', 'w') as outfile:
+    with open(self.basePath+"/options.json", "w") as outfile:
       json.dump(options, outfile, indent=2)
 
   def loadOptions(self):
-    optionsFile = open("options.json")
+    optionsFile = open(self.basePath+"/options.json")
     self.options = json.load(optionsFile)
     optionsFile.close()
 
     for option in self.data["optionsMenuItems"]:
       if not option["id"] in self.options:
         self.options[option["id"]] = option["default"]
+
+  def saveHighScore(self, score):
+    #read the options file and get the hash
+    optionsFile = open(self.basePath+"/options.json")
+    optionsString = optionsFile.read()
+    optionsStringEncoded = optionsString.encode("utf-8")
+    optionsFile.close()
+    optionsHash = hashlib.sha1(optionsStringEncoded).hexdigest()
+
+    #read the scores.json file if it exists
+    if os.path.exists(self.basePath+"/scores.json"):
+      scoresFile = open(self.basePath+"/scores.json")
+      scoresString = scoresFile.read()
+      scoresFile.close()
+      scores = json.loads(scoresString)
+    else:
+      scores = {}
+
+    #write the new score
+    scores[optionsHash] = score
+    with open(self.basePath+"/scores.json", "w") as outfile:
+      json.dump(scores, outfile, indent=2)
+
+  def loadHighScore(self):
+    #read the options file and get the hash
+    optionsFile = open(self.basePath+"/options.json")
+    optionsString = optionsFile.read()
+    optionsStringEncoded = optionsString.encode("utf-8")
+    optionsFile.close()
+    optionsHash = hashlib.sha1(optionsStringEncoded).hexdigest()
+
+    #read the scores.json file if it exists
+    if os.path.exists(self.basePath+"/scores.json"):
+      scoresFile = open(self.basePath+"/scores.json")
+      scoresString = scoresFile.read()
+      scoresFile.close()
+      scores = json.loads(scoresString)
+    else:
+      #create it if it does not exist
+      scores = {}
+      with open(self.basePath+"/scores.json", "w") as outfile:
+        json.dump(scores, outfile, indent=2)
+
+    #return the score
+    if optionsHash in scores:
+      return scores[optionsHash]
+    else:
+      return 0
 
   def getInput(self):
     while True:
