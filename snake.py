@@ -1,4 +1,4 @@
-import os, random, json, time, threading, curses, traceback, math, menu, hashlib
+import os, random, json, time, threading, curses, traceback, math, menu, hashlib, copy
 
 class Game:
   def __init__(self):
@@ -12,7 +12,8 @@ class Game:
     #read default values for variables
     self.defaultOptions = {}
     for item in self.data["optionsMenuItems"]:
-      self.defaultOptions[item["id"]] = item["default"]
+      if item["save"] == True:
+        self.defaultOptions[item["id"]] = item["default"]
 
     #read options.json
     self.basePath = os.path.abspath(os.path.dirname(__file__))
@@ -419,10 +420,11 @@ class Game:
         item = "─"*self.cols
         self.optionsMenu.appendItem(item)
         continue
-      item["oldName"] = item["name"]
+      newitem = copy.copy(item)
       if item["type"] != "text":
-        item["name"] = item["name"]+" ({value})".format(value=self.options[item["id"]])
-      self.optionsMenu.appendItem(item)
+        newitem["oldName"] = newitem["name"]
+        newitem["name"] = newitem["name"]+" ({value})".format(value=self.options[newitem["id"]])
+      self.optionsMenu.appendItem(newitem)
     self.optionsMenu.appendItem("─"*self.cols)
     self.optionsMenu.appendItem("Reset to default")
     self.optionsMenu.appendItem("Save and exit")
@@ -510,7 +512,7 @@ class Game:
                 optionsMenuItems = self.data["optionsMenuItems"]
                 #change the appropriate value in the options
                 for menuItem in optionsMenuItems:
-                  if menuItem["name"] == item["name"]:
+                  if menuItem["id"] == item["id"]:
                     self.options[menuItem["id"]] = currentItem
                     break
               if type(currentItem) is dict:
@@ -547,6 +549,7 @@ class Game:
   def saveOptions(self, options=None):
     if options == None:
       options = self.options
+        
     with open(self.basePath+"/options.json", "w") as outfile:
       json.dump(options, outfile, indent=2)
 
@@ -556,7 +559,7 @@ class Game:
     optionsFile.close()
 
     for option in self.data["optionsMenuItems"]:
-      if not option["id"] in self.options:
+      if not option["id"] in self.options and option["save"] == True:
         self.options[option["id"]] = option["default"]
 
   def saveHighScore(self, score):

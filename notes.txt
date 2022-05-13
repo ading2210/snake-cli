@@ -38,5 +38,8 @@ Data format for options menu items:
 Note for generic menu items:
  - Both str and dict work, the only thing that is displayed for dicts is the "name" value
 
+Note about high scores:
+ - High scores are associated with a hash of the options file, so that each high score is unique to the configuration of the game
+
 TODO:
  - add win detection

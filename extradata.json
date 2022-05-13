@@ -43,12 +43,14 @@
       "name": "Gradually speed up snake",
       "id":"increase_difficulty",
       "type": "toggle",
+      "save": true,
       "default": "True"
     },
     {
       "name": "Extra turn before hitting a obstacle",
-      "id":"extra_turn",
+      "id": "extra_turn",
       "type": "toggle",
+      "save": true,
       "default": "True"
     },
     {
@@ -56,24 +58,28 @@
       "id":"speed",
       "type": "choice",
       "choices": ["Slow", "Normal", "Fast"],
+      "save": true,
       "default": "Normal"
     },
     {
       "name": "Generate barriers",
       "id":"create_barriers",
       "type": "toggle",
+      "save": true,
       "default": "False"
     },
     {
       "name": "line",
       "id":"line1",
       "type": "line",
+      "save": false,
       "default": ""
     },
     {
       "name": "Credits",
       "id":"credits",
       "type": "text",
+      "save": false,
       "default": 
       ["All programming has been done by me.",
       "The curses library is used for input handling",
@@ -87,6 +93,7 @@
       "name": "Controls",
       "id":"controls",
       "type": "text",
+      "save": false,
       "default": 
       [" - WASD to move snake",
       " - X to quit game",
