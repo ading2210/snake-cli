@@ -3,7 +3,7 @@ import os, random, json, time, threading, curses, traceback, menu, hashlib, copy
 class Game:
   def __init__(self):
     #load extradata.json
-    f = open("extradata.json")
+    f = open("extradata.json", encoding="utf-8")
     self.data = json.load(f)
     f.close()
 
