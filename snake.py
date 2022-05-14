@@ -380,8 +380,8 @@ class Game:
       self.titleWindow.addstr(i, 0, self.data["titleText"][i])
 
     #create window displaying main menu text
-    self.mainMenuWindow = curses.newwin(self.rows, self.cols, 8, 0)
-    self.mainMenuWindow2 = curses.newwin(self.rows, self.cols, 9, 0)
+    self.mainMenuWindow = curses.newwin(self.rows-8, self.cols, 8, 0)
+    self.mainMenuWindow2 = curses.newwin(self.rows-9, self.cols, 9, 0)
 
     #calculate where to place text
     text = self.data["mainMenuText"]
@@ -413,6 +413,7 @@ class Game:
     items = self.data["optionsMenuItems"]
     #create window for menu
     self.optionsMenuWindow = curses.newwin(self.rows, self.cols, 0, 0)
+    self.optionsMenuWindow.keypad(1)
     self.optionsMenu = menu.Menu(self.optionsMenuWindow)
 
     #set up options menu
@@ -442,11 +443,11 @@ class Game:
 
       if key == ord("x"):
         break
-      elif key == 65: #up
+      elif key == curses.KEY_UP: #up
         self.optionsMenu.decreaseIndex()
         if self.optionsMenu.currentItemText() == "─"*self.cols:
           self.optionsMenu.decreaseIndex()
-      elif key == 66: #down
+      elif key == curses.KEY_DOWN: #down
         self.optionsMenu.increaseIndex()
         if self.optionsMenu.currentItemText() == "─"*self.cols:
           self.optionsMenu.increaseIndex()
@@ -475,6 +476,7 @@ class Game:
           #raise Exception(item)
           #create submenu
           submenuWindow = curses.newwin(self.rows, self.cols, 0, 0)
+          submenuWindow.keypad(1)
           submenu = menu.Menu(submenuWindow)
           submenu.setTitle("Submenu: "+item["name"])
           submenu.setFooter("Use arrow keys to navigate. Enter to select. X to exit.")
@@ -507,11 +509,11 @@ class Game:
             if key == ord("x"):
               break
             if item["type"] != "text":
-              if key == 65: #up
+              if key == curses.KEY_UP: #up
                 submenu.decreaseIndex()
                 if submenu.currentItem() == "─"*self.cols:
                   submenu.decreaseIndex()
-              if key == 66: #down
+              if key == curses.KEY_DOWN: #down
                 submenu.increaseIndex()
                 if submenu.currentItem() == "─"*self.cols:
                   submenu.increaseIndex()
