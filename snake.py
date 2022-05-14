@@ -67,6 +67,7 @@ class Game:
     self.inputQueue = []
     self.currentHighScore = 0
     self.playSound = False
+    self.foodCount = 1
 
     self.applyOptions()
 
@@ -83,6 +84,7 @@ class Game:
       self.extra_turn_active = False
     if self.options["play_sound"] == "True":
       self.playSound = True
+    self.foodCount = int(self.options["food_count"])
 
   #function to set up curses
   def setupCurses(self):
@@ -131,7 +133,7 @@ class Game:
     return self.displayBoard[y][x]
 
   #function to generate a food pellet
-  def generateFood(self):
+  def generateFood(self, count=1):
     eligible_tiles = []
     for y in range(0, self.height):
       for x in range(0, self.width):
@@ -142,9 +144,11 @@ class Game:
 
     if len(eligible_tiles) > 0:
       #one tile is chosen and the food is placed
-      y, x = random.choice(eligible_tiles)
-      self.setPixel(x, y, -1)
-      self.setDisplayPixel(x, y, "$")
+      tiles = random.sample(eligible_tiles, min(count, len(eligible_tiles)))
+      for tile in tiles:
+        y, x = tile
+        self.setPixel(x, y, -1)
+        self.setDisplayPixel(x, y, "$")
 
   #this function generates a barrier, which is basically
   #the same as the previous function
@@ -208,7 +212,7 @@ class Game:
     self.previousDirection = "east"
 
     #generate first food pellet
-    self.generateFood()
+    self.generateFood(self.foodCount)
 
     #set game window to nodelay mode
     self.gameWindow.nodelay(True)

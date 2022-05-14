@@ -41,7 +41,7 @@
   "optionsMenuItems": [
     {
       "name": "Gradually speed up snake",
-      "id":"increase_difficulty",
+      "id": "increase_difficulty",
       "type": "toggle",
       "save": true,
       "default": "True"
@@ -55,7 +55,7 @@
     },
     {
       "name": "Snake speed",
-      "id":"speed",
+      "id": "speed",
       "type": "choice",
       "choices": ["Slow", "Normal", "Fast"],
       "save": true,
@@ -63,28 +63,36 @@
     },
     {
       "name": "Generate barriers",
-      "id":"create_barriers",
+      "id": "create_barriers",
       "type": "toggle",
       "save": true,
       "default": "False"
     },
     {
       "name": "Play sound when food is eaten",
-      "id":"play_sound",
+      "id": "play_sound",
       "type": "toggle",
       "save": true,
       "default": "True"
     },
     {
+      "name": "Amount of food",
+      "id": "food_count",
+      "type": "choice",
+      "choices": ["1", "3", "5"],
+      "save": true,
+      "default": "1"
+    },
+    {
       "name": "line",
-      "id":"line1",
+      "id": "line1",
       "type": "line",
       "save": false,
       "default": ""
     },
     {
       "name": "Credits",
-      "id":"credits",
+      "id": "credits",
       "type": "text",
       "save": false,
       "default": 
@@ -98,7 +106,7 @@
     },
     {
       "name": "Controls",
-      "id":"controls",
+      "id": "controls",
       "type": "text",
       "save": false,
       "default": 
