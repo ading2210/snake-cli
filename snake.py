@@ -66,7 +66,7 @@ class Game:
     self.extra_turn_active = False
     self.inputQueue = []
     self.currentHighScore = 0
-    self.play_sound = False
+    self.playSound = False
 
     self.applyOptions()
 
