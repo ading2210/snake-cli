@@ -3,7 +3,8 @@ import os, random, json, time, threading, curses, traceback, menu, hashlib, copy
 class Game:
   def __init__(self):
     #load extradata.json
-    f = open("extradata.json", encoding="utf-8")
+    self.basePath = os.path.abspath(os.path.dirname(__file__))
+    f = open(self.basePath+"/extradata.json", encoding="utf-8")
     self.data = json.load(f)
     f.close()
 
@@ -16,7 +17,6 @@ class Game:
         self.defaultOptions[item["id"]] = item["default"]
 
     #read options.json
-    self.basePath = os.path.abspath(os.path.dirname(__file__))
     if os.path.exists(self.basePath+"/options.json"):
       self.loadOptions()
     else:
