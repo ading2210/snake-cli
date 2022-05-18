@@ -513,11 +513,11 @@ class Game:
             if key == ord("x"):
               break
             if item["type"] != "text":
-              if key == curses.KEY_UP: #up
+              if key == curses.KEY_UP or key == 450: #up
                 submenu.decreaseIndex()
                 if submenu.currentItem() == "─"*self.cols:
                   submenu.decreaseIndex()
-              if key == curses.KEY_DOWN: #down
+              if key == curses.KEY_DOWN or key == 456: #down
                 submenu.increaseIndex()
                 if submenu.currentItem() == "─"*self.cols:
                   submenu.increaseIndex()
