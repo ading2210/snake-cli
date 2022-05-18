@@ -447,11 +447,11 @@ class Game:
 
       if key == ord("x"):
         break
-      elif key == curses.KEY_UP: #up
+      elif key == curses.KEY_UP or key == 450: #up
         self.optionsMenu.decreaseIndex()
         if self.optionsMenu.currentItemText() == "─"*self.cols:
           self.optionsMenu.decreaseIndex()
-      elif key == curses.KEY_DOWN: #down
+      elif key == curses.KEY_DOWN or key == 456: #down
         self.optionsMenu.increaseIndex()
         if self.optionsMenu.currentItemText() == "─"*self.cols:
           self.optionsMenu.increaseIndex()
